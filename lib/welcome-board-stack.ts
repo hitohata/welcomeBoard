@@ -3,7 +3,6 @@ import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambdaGo from "@aws-cdk/aws-lambda-go-alpha";
 import * as path from "path";
-import { table } from 'console';
 
 interface IProps extends StackProps {
   deployStage: string
