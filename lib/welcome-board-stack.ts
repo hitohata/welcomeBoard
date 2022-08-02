@@ -25,7 +25,7 @@ export class WelcomeBoardStack extends Stack {
       "welcomeMessageFunction",
       {
         functionName: `welcomeMessageFunction${deployStage}`,
-        entry: path.join(__dirname, "../lambda/welcomeBoard/main.go"),
+        entry: path.join(__dirname, "../lambda/welcomeBoard/src/main.go"),
       },
     );
 

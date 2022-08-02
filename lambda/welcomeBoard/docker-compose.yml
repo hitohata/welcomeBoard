@@ -1,0 +1,12 @@
+version: '3'
+services:
+  welcome-message-app:
+    image: golang:1.19rc2-buster
+    depends_on:
+      - welcome-message-dynamo
+    working_dir: /code
+    volumes:
+      - .:/code
+  welcome-message-dynamo:
+    image: amazon/dynamodb-local
+    command: -jar DynamoDBLocal.jar 
