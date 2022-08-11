@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambdaGo from "@aws-cdk/aws-lambda-go-alpha";
 import * as apiGateway from "aws-cdk-lib/aws-apigateway";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 
 interface IProps extends StackProps {
@@ -26,6 +27,7 @@ export class WelcomeBoardStack extends Stack {
       {
         functionName: `welcomeMessageFunction${deployStage}`,
         entry: path.join(__dirname, "../lambda/welcomeBoard/src/main.go"),
+        runtime: lambda.Runtime.GO_1_X
       },
     );
 

@@ -10,3 +10,10 @@ services:
   welcome-message-dynamo:
     image: amazon/dynamodb-local
     command: -jar DynamoDBLocal.jar 
+  welcome-init-table:
+    image: golang:1.18rc2-buster
+    depends_on:
+      - welcome-message-dynamo
+    working_dir: /code
+    volumes:
+      - ./test_db_schema:/code
