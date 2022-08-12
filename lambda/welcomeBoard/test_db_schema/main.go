@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type Message struct {
@@ -27,8 +29,6 @@ func main() {
 			Value: aws.Credentials{
 				AccessKeyID:     "dummyKey",
 				SecretAccessKey: "dummyKey",
-				SessionToken:    "",
-				Source:          DYNAMO_ENDPOINT,
 			},
 		}))
 
@@ -38,8 +38,29 @@ func main() {
 
 	client := dynamodb.NewFromConfig(cfg)
 
-	resp, err := &client.CreateTable({
-		TableName: "WeddingMessageTable",
-	})
+	create_table_input := &dynamodb.CreateTableInput{
+		AttributeDefinitions: []types.AttributeDefinition{
+			{
+				AttributeName: aws.String("Keyword"),
+				AttributeType: "S",
+			},
+		},
+		KeySchema: []types.KeySchemaElement{
+			{
+				AttributeName: aws.String("Keyword"),
+				KeyType: "HASH",
+			},
+		},
+		TableName: aws.String("WeddingMessage"),
+		BillingMode: "PAY_PAR_REQUEST",
+	}
+
+	resp, err := client.CreateTable(context.TODO(), create_table_input)
+
+	if (err != nil) {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Println("resp", resp)
 
 }
