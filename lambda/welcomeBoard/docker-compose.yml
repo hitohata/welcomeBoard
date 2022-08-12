@@ -1,7 +1,7 @@
 version: '3'
 services:
   welcome-message-app:
-    image: golang:1.19rc2-buster
+    image: golang:1.18-buster
     depends_on:
       - welcome-message-dynamo
     working_dir: /code
@@ -9,11 +9,12 @@ services:
       - .:/code
   welcome-message-dynamo:
     image: amazon/dynamodb-local
-    command: -jar DynamoDBLocal.jar 
+    command: -jar DynamoDBLocal.jar
   welcome-init-table:
-    image: golang:1.18rc2-buster
+    image: golang:1.18-buster
     depends_on:
       - welcome-message-dynamo
     working_dir: /code
+    command: go run .
     volumes:
       - ./test_db_schema:/code
