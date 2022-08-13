@@ -9,7 +9,7 @@ services:
       - .:/code
   welcome-message-dynamo:
     image: amazon/dynamodb-local
-    command: -jar DynamoDBLocal.jar
+    command: "-jar DynamoDBLocal.jar -dbPath ."
   welcome-init-table:
     image: golang:1.18-buster
     depends_on:
