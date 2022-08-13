@@ -1,14 +1,12 @@
-# Welcome to your CDK TypeScript project
+# My wedding welcome message APP
 
-This is a blank project for CDK development with TypeScript.
+This is for my wedding.
+This APP manages welcome messages for guests of my wedding party. 
+The guests accept the LINE account of my party and access this system via LINE API.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Structure
 
-## Useful commands
+![structure](/img/structure.drawio.svg)
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+The messages is hosted at the DynamoDB.
+That is written by us. Using managing App that is using APPSync on this diagram.
