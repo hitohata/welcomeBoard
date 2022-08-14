@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
@@ -25,6 +25,7 @@ export class WelcomeBoardManagerStack extends Stack {
                 name: "Keyword",
                 type: dynamodb.AttributeType.STRING
             },
+            removalPolicy: RemovalPolicy.DESTROY
         });
 
         this.welcomeMessageTableArn = welcomeMessageTable.tableArn;
