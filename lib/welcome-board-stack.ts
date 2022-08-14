@@ -5,7 +5,6 @@ import * as lambdaGo from "@aws-cdk/aws-lambda-go-alpha";
 import * as apiGateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
-import { table } from 'console';
 
 interface IProps extends StackProps {
   deployStage: string
@@ -25,7 +24,7 @@ export class WelcomeBoardStack extends Stack {
       "welcomeMessageFunction",
       {
         functionName: `welcomeMessageFunction${deployStage}`,
-        entry: path.join(__dirname, "../lambda/welcomeBoard/src/main.go"),
+        entry: path.join(__dirname, "../lambda/welcomeBoard/src/handler.go"),
         runtime: lambda.Runtime.GO_1_X
       },
     );

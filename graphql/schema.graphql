@@ -16,5 +16,4 @@ input MessageInput {
 type Mutation {
     addMessage(input: MessageInput!): Message
     updateMessage(input: MessageInput!): Message
-    deleteMessage(Keyword: ID!)
 }

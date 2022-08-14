@@ -1,7 +1,6 @@
 import { Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as lambdaGo from "@aws-cdk/aws-lambda-go-alpha";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as path from "path";
@@ -83,11 +82,11 @@ export class WelcomeBoardManagerStack extends Stack {
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
         });
 
-        dynamoDS.createResolver({
-            typeName: "Mutation",
-            fieldName: "deleteMessage",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword")
-        });
+        // dynamoDS.createResolver({
+        //     typeName: "Mutation",
+        //     fieldName: "deleteMessage",
+        //     requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword")
+        // });
 
     }
 
