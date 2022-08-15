@@ -4,6 +4,7 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as path from "path";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
 interface IProps extends StackProps {
     deployStageSuffix: string
@@ -31,8 +32,10 @@ export class WelcomeBoardManagerStack extends Stack {
         this.welcomeMessageTableArn = welcomeMessageTable.tableArn;
 
         const userPool = new cognito.UserPool(this, "welcomeMessageManagementUser", {
-            userPoolName: `WelcomeMessageManagementUsers${deployStageSuffix}`
+            userPoolName: `WelcomeMessageManagementUsers${deployStageSuffix}`,
+            removalPolicy: RemovalPolicy.DESTROY
         });
+        const appSyncClient = userPool.addClient("WeddingSync");
 
         const appSyncApi = new appsync.GraphqlApi(this, "AppSyncApi", {
             name: `welcomeMessageTableApi${deployStageSuffix}`,
@@ -44,7 +47,7 @@ export class WelcomeBoardManagerStack extends Stack {
                         userPool: userPool
                     },
                 }
-            }
+            },
         });
 
         const dynamoDS = appSyncApi.addDynamoDbDataSource("dynamoDS", welcomeMessageTable);
@@ -67,7 +70,7 @@ export class WelcomeBoardManagerStack extends Stack {
             typeName: "Mutation",
             fieldName: "addMessage",
             requestMappingTemplate: appsync.MappingTemplate.dynamoDbPutItem(
-                appsync.PrimaryKey.partition("Keyword").auto(),
+                appsync.PrimaryKey.partition("Keyword").is("input.Keyword"),
                 appsync.Values.projecting("input")
             ),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
@@ -77,7 +80,7 @@ export class WelcomeBoardManagerStack extends Stack {
             typeName: "Mutation",
             fieldName: "updateMessage",
             requestMappingTemplate: appsync.MappingTemplate.dynamoDbPutItem(
-                appsync.PrimaryKey.partition("Keyword").auto(),
+                appsync.PrimaryKey.partition("Keyword").is("input.Keyword"),
                 appsync.Values.projecting("input")
             ),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
