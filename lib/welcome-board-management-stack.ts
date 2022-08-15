@@ -4,7 +4,6 @@ import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as path from "path";
-import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
 interface IProps extends StackProps {
     deployStageSuffix: string
@@ -35,7 +34,7 @@ export class WelcomeBoardManagerStack extends Stack {
             userPoolName: `WelcomeMessageManagementUsers${deployStageSuffix}`,
             removalPolicy: RemovalPolicy.DESTROY
         });
-        const appSyncClient = userPool.addClient("WeddingSync");
+        userPool.addClient("WeddingSync");
 
         const appSyncApi = new appsync.GraphqlApi(this, "AppSyncApi", {
             name: `welcomeMessageTableApi${deployStageSuffix}`,
@@ -78,19 +77,10 @@ export class WelcomeBoardManagerStack extends Stack {
 
         dynamoDS.createResolver({
             typeName: "Mutation",
-            fieldName: "updateMessage",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbPutItem(
-                appsync.PrimaryKey.partition("Keyword").is("input.Keyword"),
-                appsync.Values.projecting("input")
-            ),
+            fieldName: "deleteMessage",
+            requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword"),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
         });
-
-        // dynamoDS.createResolver({
-        //     typeName: "Mutation",
-        //     fieldName: "deleteMessage",
-        //     requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword")
-        // });
 
     }
 
