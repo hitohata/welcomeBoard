@@ -53,31 +53,17 @@ function App() {
     createClient();
     }
 
-  }, [Auth.currentAuthenticatedUser()])
+  }, []);
 
   return (
-    <Authenticator>
+    <>
       {!client && <Hearts /> }
       {client && (
 					<ApolloProvider client={client}>
-						<div className="App">
 							<GetSample />
-							<header className="App-header">
-								<img src={logo} className="App-logo" alt="logo" />
-								<p>Edit <code>src/App.tsx</code> and save to reload.</p>
-								<a
-									className="App-link"
-									href="https://reactjs.org"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									Learn React
-								</a>
-							</header>
-						</div>
 					</ApolloProvider>
 				)}
-    </Authenticator>
+    </>
   );
 }
 
