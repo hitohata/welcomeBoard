@@ -15,6 +15,13 @@ export type Scalars = {
   Float: number;
 };
 
+export type Message = {
+  __typename?: 'Message';
+  Keyword: Scalars['ID'];
+  Message?: Maybe<Scalars['String']>;
+  Name?: Maybe<Scalars['String']>;
+};
+
 export type MessageInput = {
   Keyword: Scalars['ID'];
   Message?: InputMaybe<Scalars['String']>;
@@ -48,24 +55,17 @@ export type QueryGetMessageArgs = {
   Keyword: Scalars['ID'];
 };
 
-export type Message = {
-  __typename?: 'message';
-  Keyword: Scalars['ID'];
-  Message?: Maybe<Scalars['String']>;
-  Name?: Maybe<Scalars['String']>;
-};
-
 export type GetMessageQueryVariables = Exact<{
   keyword?: InputMaybe<Scalars['ID']>;
 }>;
 
 
-export type GetMessageQuery = { __typename?: 'Query', getMessage?: { __typename?: 'message', Keyword: string, Message?: string | null, Name?: string | null } | null };
+export type GetMessageQuery = { __typename?: 'Query', getMessage?: { __typename?: 'Message', Keyword: string, Message?: string | null, Name?: string | null } | null };
 
 export type ListMessagesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListMessagesQuery = { __typename?: 'Query', listMessages?: Array<{ __typename?: 'message', Keyword: string, Name?: string | null, Message?: string | null }> | null };
+export type ListMessagesQuery = { __typename?: 'Query', listMessages?: Array<{ __typename?: 'Message', Keyword: string, Name?: string | null, Message?: string | null }> | null };
 
 export type AddMessageMutationVariables = Exact<{
   keyword?: InputMaybe<Scalars['ID']>;
@@ -74,14 +74,14 @@ export type AddMessageMutationVariables = Exact<{
 }>;
 
 
-export type AddMessageMutation = { __typename?: 'Mutation', addMessage?: { __typename?: 'message', Keyword: string, Message?: string | null, Name?: string | null } | null };
+export type AddMessageMutation = { __typename?: 'Mutation', addMessage?: { __typename?: 'Message', Keyword: string, Message?: string | null, Name?: string | null } | null };
 
 export type DeleteMessageMutationVariables = Exact<{
   keyword?: Scalars['ID'];
 }>;
 
 
-export type DeleteMessageMutation = { __typename?: 'Mutation', deleteMessage?: { __typename?: 'message', Keyword: string, Message?: string | null, Name?: string | null } | null };
+export type DeleteMessageMutation = { __typename?: 'Mutation', deleteMessage?: { __typename?: 'Message', Keyword: string, Message?: string | null, Name?: string | null } | null };
 
 
 export const GetMessageDocument = gql`
