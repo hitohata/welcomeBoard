@@ -9,12 +9,13 @@ type UnwrapArray<T> = T extends Array<infer R> ? R : never
 
 export const ListMessages: React.FC = () => {
 
-    const { loading, error, data } = useListMessagesQuery()
+    const { loading, error, data } = useListMessagesQuery({
+        fetchPolicy: "no-cache"
+    })
 
     if (loading) {
         return <LoadingHearts />
     }
-
 
     return <>
         <Box sx={{ padding: 5 }}>
@@ -52,16 +53,20 @@ const Message: React.FC<IMessage> = (props) => {
         {
             open 
             ? (
-                <>
+                <div>
                     <Button onClick={ handleClose }>Close</Button>
                     <CreateMessage keyword={ message.Keyword } />
-                </>
+                </div>
             )
-            :  (<Button onClick={ handleOpen }>
-                    <Typography>
-                        { `${message.Keyword} ${message.Name || ""}` }
-                    </Typography>
-                </Button>)
+            : (
+                <div>
+                    <Button onClick={ handleOpen }>
+                        <Typography>
+                            { `${message.Keyword} ${message.Name || ""}` }
+                        </Typography>
+                    </Button>
+                </div>
+            )
         }
         </>
     )
