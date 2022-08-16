@@ -7,7 +7,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 
 interface IProps extends StackProps {
-  deployStage: string
+  stageSuffix: string
   tableArn: string
 }
 
@@ -15,7 +15,7 @@ export class WelcomeBoardStack extends Stack {
   constructor(scope: Construct, id: string, props: IProps) {
     super(scope, id, props);
 
-    const { deployStage, tableArn } = props;
+    const { stageSuffix, tableArn } = props;
 
     const messageTable = dynamodb.Table.fromTableArn(this, "messageTable", tableArn);
 
@@ -23,7 +23,7 @@ export class WelcomeBoardStack extends Stack {
       this,
       "welcomeMessageFunction",
       {
-        functionName: `welcomeMessageFunction${deployStage}`,
+        functionName: `welcomeMessageFunction${stageSuffix}`,
         entry: path.join(__dirname, "../lambda/welcomeBoard/src/handler.go"),
         runtime: lambda.Runtime.GO_1_X
       },

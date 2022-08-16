@@ -1,14 +1,10 @@
 import { Amplify, Auth } from "aws-amplify";
-import { Authenticator } from "@aws-amplify/ui-react";
-import '@aws-amplify/ui-react/styles.css';
-import logo from './logo.svg';
-import './App.css';
 import { ApolloClient, ApolloProvider, NormalizedCacheObject, createHttpLink, InMemoryCache } from '@apollo/client';
-import { GetSample } from "./Get";
 import { useState, useEffect } from "react";
 import { setContext } from "@apollo/client/link/context";
 import { Hearts } from "react-loader-spinner";
 import { inMemoryCacheConfig } from "./ApolloCache";
+import { MessageTopView } from "./MessageViews/MessageTopView";
 
 Amplify.configure({
   aws_project_region: process.env.REACT_APP_PROJECT_REGION,
@@ -60,7 +56,7 @@ function App() {
       {!client && <Hearts /> }
       {client && (
 					<ApolloProvider client={client}>
-							<GetSample />
+							<MessageTopView />
 					</ApolloProvider>
 				)}
     </>

@@ -10,7 +10,6 @@ query ListMessages {
   listMessages {
     Keyword
     Name
-    Message
   }
 }
 

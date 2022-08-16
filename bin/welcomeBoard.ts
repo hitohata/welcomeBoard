@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { WelcomeBoardStack } from '../lib/welcome-board-stack';
 import { WelcomeBoardManagerStack } from '../lib/welcome-board-management-stack';
+import { WelcomeBoardManagerFrontStack } from "../lib/welcome-board-manager-front";
 
 
 /**
@@ -28,6 +29,9 @@ const stageSuffix = deployStageSuffix(process.env.DEPLOY_STAGE)
 const app = new cdk.App();
 const manager = new WelcomeBoardManagerStack(app, `WelcomeMessageManagerStack${stageSuffix}`, {deployStageSuffix: stageSuffix});
 new WelcomeBoardStack(app, `WelcomeMessageStack${stageSuffix}`, {
-  deployStage: stageSuffix,
+  stageSuffix: stageSuffix,
   tableArn: manager.tableArn()
 });
+new WelcomeBoardManagerFrontStack(app, `WelcomeMessageFrontStack${stageSuffix}`, {
+  stageSuffix: stageSuffix
+})
