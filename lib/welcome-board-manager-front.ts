@@ -28,6 +28,14 @@ export class WelcomeBoardManagerFrontStack extends Stack {
                     defaultTtl: Duration.seconds(0)
                 })
             },
+            defaultRootObject: "index.html",
+            errorResponses: [
+                {
+                    httpStatus: 404,
+                    responseHttpStatus: 200,
+                    responsePagePath: "./index.html"
+                }
+            ]
         });
 
         new s3deploy.BucketDeployment(this, "MessageConsole", {

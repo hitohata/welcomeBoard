@@ -51,7 +51,7 @@ const Message: React.FC<IMessage> = (props) => {
     return (
         <>
         {
-            open 
+            open
             ? (
                 <div>
                     <Button onClick={ handleClose }>Close</Button>

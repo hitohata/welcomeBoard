@@ -102,12 +102,8 @@ export const CreateMessage:React.FC<IProps> = (props) => {
                         Post
                     </Button>
                 </Grid>
-                { getMessageState.error &&
-                    <Typography>{getMessageState.error.message}</Typography>
-                }
-                { addMessageState.error &&
-                    <Typography>{ addMessageState.error.message }</Typography>
-                }
+                { getMessageState.error && <Typography>{getMessageState.error.message}</Typography> }
+                { addMessageState.error && <Typography>{ addMessageState.error.message }</Typography> }
             </Grid>
         </React.Fragment>
     )
