@@ -24,19 +24,23 @@ export class WelcomeBoardStack extends Stack {
       "welcomeMessageFunction",
       {
         functionName: `welcomeMessageFunction${stageSuffix}`,
-        entry: path.join(__dirname, "../lambda/welcomeBoard/src/handler.go"),
+        // entry: path.join(__dirname, "../lambda/welcomeBoard/src/handler.go"),
+        entry: path.join(__dirname, "../lambda/echoServer/main.go"),
         runtime: lambda.Runtime.GO_1_X
       },
     );
 
     messageTable.grantReadData(messageFunction);
 
-    const api = new apiGateway.RestApi(this, "apiGateway", {});
-    const resource = api.root.addResource("v1");
+    const api = new apiGateway.LambdaRestApi(this, "apiGateway", {
+      restApiName: `WelcomeMessageAPI${stageSuffix}`,
+      handler: messageFunction,
+      proxy: false
+    });
 
-    resource.addProxy({
-      defaultIntegration: new apiGateway.LambdaIntegration(messageFunction),
-      anyMethod: true
-    })
+    const lineWebHook = api.root.addResource("callback");
+
+    lineWebHook.addMethod("POST");
+
   }
 }
