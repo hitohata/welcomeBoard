@@ -13,7 +13,8 @@ That is written by us. Using managing App that is using APPSync on this diagram.
 
 ## Folder
 
-| Folder | Detail |
-| :----- | :----- |
-| graphql | GQL definition |
+| Folder          | Detail                                |
+| :-------------- | :------------------------------------ |
+| graphql         | GQL definition                        |
 | manager-console | Message CRUD console created by React |
+| lambda          | Lambda's program                      |

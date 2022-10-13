@@ -30,7 +30,9 @@ const app = new cdk.App();
 const manager = new WelcomeBoardManagerStack(app, `WelcomeMessageManagerStack${stageSuffix}`, {deployStageSuffix: stageSuffix});
 new WelcomeBoardStack(app, `WelcomeMessageStack${stageSuffix}`, {
   stageSuffix: stageSuffix,
-  tableArn: manager.tableArn()
+  tableArn: manager.tableArn(),
+  channelSecret: process.env.CHANNEL_SECRET!,
+  channelToken: process.env.CHANNEL_TOKEN!
 });
 new WelcomeBoardManagerFrontStack(app, `WelcomeMessageFrontStack${stageSuffix}`, {
   stageSuffix: stageSuffix

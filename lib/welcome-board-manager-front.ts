@@ -21,7 +21,7 @@ export class WelcomeBoardManagerFrontStack extends Stack {
             removalPolicy: RemovalPolicy.DESTROY
         });
 
-        const front = new cloudfront.Distribution(this, "managerFrontDistribution", {
+        new cloudfront.Distribution(this, "managerFrontDistribution", {
             defaultBehavior: {
                 origin: new origins.S3Origin(hostingBucket),
                 cachePolicy: new cloudfront.CachePolicy(this, "managerFrontCache", {
@@ -29,13 +29,13 @@ export class WelcomeBoardManagerFrontStack extends Stack {
                 })
             },
             defaultRootObject: "index.html",
-            errorResponses: [
-                {
-                    httpStatus: 404,
-                    responseHttpStatus: 200,
-                    responsePagePath: "./index.html"
-                }
-            ]
+            // errorResponses: [
+            //     {
+            //         httpStatus: 404,
+            //         responseHttpStatus: 200,
+            //         responsePagePath: "./index.html"
+            //     }
+            // ]
         });
 
         new s3deploy.BucketDeployment(this, "MessageConsole", {

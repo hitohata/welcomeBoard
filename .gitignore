@@ -12,3 +12,6 @@ cdk.out
 .env
 
 !manager-console/src/react-app-env.d.ts
+
+*.sh
+*.ps1
