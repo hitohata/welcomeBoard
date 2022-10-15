@@ -32,7 +32,9 @@ new WelcomeBoardStack(app, `WelcomeMessageStack${stageSuffix}`, {
   stageSuffix: stageSuffix,
   tableArn: manager.tableArn(),
   channelSecret: process.env.CHANNEL_SECRET!,
-  channelToken: process.env.CHANNEL_TOKEN!
+  channelToken: process.env.CHANNEL_TOKEN!,
+  managerChannelSecret: process.env.MANAGER_CHANNEL_SECRET!,
+  managerChannelToken: process.env.MANAGER_CHANNEL_TOKEN!
 });
 new WelcomeBoardManagerFrontStack(app, `WelcomeMessageFrontStack${stageSuffix}`, {
   stageSuffix: stageSuffix

@@ -9,14 +9,16 @@ interface IProps extends StackProps {
   stageSuffix: string
   tableArn: string
   channelSecret: string
-  channelToken: string
+  channelToken: string,
+  managerChannelSecret: string,
+  managerChannelToken: string
 }
 
 export class WelcomeBoardStack extends Stack {
   constructor(scope: Construct, id: string, props: IProps) {
     super(scope, id, props);
 
-    const { stageSuffix, tableArn, channelSecret, channelToken } = props;
+    const { stageSuffix, tableArn, channelSecret, channelToken, managerChannelSecret, managerChannelToken } = props;
 
     const messageTable = dynamodb.Table.fromTableArn(this, "messageTable", tableArn);
 
@@ -30,7 +32,9 @@ export class WelcomeBoardStack extends Stack {
         timeout: Duration.seconds(10),
         environment: {
           CHANNEL_SECRET: channelSecret,
-          CHANNEL_TOKEN: channelToken
+          CHANNEL_TOKEN: channelToken,
+          MANAGER_CHANNEL_SECRET: managerChannelSecret,
+          MANAGER_CHANNEL_TOKEN: managerChannelToken
         }
       },
     );

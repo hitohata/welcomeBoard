@@ -6,7 +6,7 @@ export class LineClient {
 
     private lineClient: Client;
 
-    constructor (signature?: string, body?: string) {
+    constructor (signature?: string, body?: string | null) {
 
         if (!signature) {
             throw new Error("signature is not provided!");
@@ -25,15 +25,10 @@ export class LineClient {
         };
 
         this.lineClient = new Client({
-            channelAccessToken: userChannelConfig.channelToken,
+            channelAccessToken: userChannelConfig.channelAccessToken,
             channelSecret: userChannelConfig.channelSecret
         });
     };
-
-    public async replayMessage(event: WebhookEvent) {
-        // const replayMessage = event.
-        this.lineClient.replyMessage()
-    }
 
     /**
      * get a user profile and return the user name.
