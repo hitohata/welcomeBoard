@@ -27,7 +27,7 @@ export class WelcomeBoardStack extends Stack {
       "welcomeMessageFunction",
       {
         functionName: `welcomeMessageFunction${stageSuffix}`,
-        entry: path.join(__dirname, "../lambda/echoServer/src/main.ts"),
+        entry: path.join(__dirname, "../lambda/main/src/main.ts"),
         handler: "lambdaHandler",
         timeout: Duration.seconds(10),
         environment: {
