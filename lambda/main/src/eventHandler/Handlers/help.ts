@@ -1,9 +1,19 @@
 import { LocationMessage, Message, PostbackEvent, TemplateMessage, TextMessage } from "@line/bot-sdk";
-import { MessageDb } from "database/messageDb";
+import { IMessageDb } from "database/IMessageDb";
 
-export class Helper {
+export interface IHelperHandler {
+    helperTemplate(): TemplateMessage
+    helpMessage(event: PostbackEvent): Promise<Message>
+}
+
+export class HelperHandler {
     private readonly location = "location";
     private readonly dateTime = "dateTime";
+    private readonly messageDb: IMessageDb;
+
+    constructor(messageDb: IMessageDb) {
+        this.messageDb = messageDb;
+    };
 
     public helperTemplate(): TemplateMessage {
         const helperTemplate: TemplateMessage = {
@@ -35,8 +45,7 @@ export class Helper {
 
         if (postbackData === this.location) {
 
-            const messageDbClient = new MessageDb();
-            const locationData = await messageDbClient.getLocation();
+            const locationData = await this.messageDb.getLocation();
 
             const locationMessage: LocationMessage = {
                 type: "location",
@@ -52,8 +61,7 @@ export class Helper {
         if (postbackData === this.dateTime) {
 
             // wedding date time
-            const messageDbClient = new MessageDb();
-            const dateTimeData = await messageDbClient.getWaddingDate();
+            const dateTimeData = await this.messageDb.getWaddingDate();
             const weddingDateTime = new Date(dateTimeData.Date);
 
             // current date time

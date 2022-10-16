@@ -2,12 +2,13 @@ import { DynamoDBClient, GetItemCommand, GetItemCommandInput } from "@aws-sdk/cl
 import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
 import { IDateTime, ILocationInfo, IMessage, IMessageDb } from "./IMessageDb";
 
-const kindInformation = "Information";
-const kindMessage = "Message";
-
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
     private readonly tableName: string;
+
+    private readonly kindInformation = "Information";
+    private readonly kindMessage = "Message";
+
     constructor(){
         this.client = new DynamoDBClient({ region: process.env.REGION });
         this.tableName = process.env.TABLE_NAME!;
@@ -21,7 +22,7 @@ export class MessageDb implements IMessageDb {
             TableName: this.tableName,
             Key: { 
                 "Keyword": { "S": pkName },
-                "Kind": { "S": kindInformation }
+                "Kind": { "S": this.kindInformation }
             }
         };
 
@@ -55,7 +56,7 @@ export class MessageDb implements IMessageDb {
             TableName: this.tableName,
             Key: { 
                 "Keyword": { "S": pkName },
-                "Kind": { "S" : kindInformation },
+                "Kind": { "S" : this.kindInformation },
             }
         };
 
@@ -83,7 +84,7 @@ export class MessageDb implements IMessageDb {
             TableName: this.tableName,
             Key: {
                 "Keyword": { "S": keyword },
-                "Kind": { "S": kindMessage }
+                "Kind": { "S": this.kindMessage }
             }
         }
 

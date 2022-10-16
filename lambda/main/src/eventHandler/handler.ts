@@ -1,16 +1,28 @@
-import { Client, validateSignature, WebhookEvent, MessageEvent, PostbackEvent, Message, LocationMessage, TemplateMessage, TextMessage } from "@line/bot-sdk";
-import { Settings } from "settings/settings";
+import { WebhookEvent } from "@line/bot-sdk";
 import { HostLineClient, UserLineClient } from "./lineClients";
-import { Helper } from "./Handlers/help";
-import { MessageDb } from "database/messageDb";
+import { IProfileHandler } from "./Handlers/profile";
+import { IHelperHandler } from "./Handlers/help";
+import { ITextMessageHandler } from "./Handlers/textMessage";
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
     private readonly hostLineClient: HostLineClient;
+    private readonly helpHandler: IHelperHandler;
+    private readonly profileHandler: IProfileHandler;
+    private readonly textMessageHandler: ITextMessageHandler
 
-    constructor(userLineClient: UserLineClient, hostLineClient: HostLineClient) {
+    constructor(
+        userLineClient: UserLineClient, 
+        hostLineClient: HostLineClient,
+        helperHandler: IHelperHandler,
+        profileHandler: IProfileHandler,
+        textMessageHandler: ITextMessageHandler
+    ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
+        this.helpHandler = helperHandler;
+        this.profileHandler = profileHandler;
+        this.textMessageHandler = textMessageHandler;
     }
 
     public async checkEvent(event: WebhookEvent) {
@@ -19,30 +31,47 @@ export class Handler {
 
             const replayToken = event.replyToken;
 
-            const inputMessage = event.message.text;
+            const userInput = event.message.text;
 
-            if (inputMessage === "help") {
-                const helper = new Helper()
-                const templateMessage = helper.helperTemplate();
+            if (userInput === "help") {
+
+                const templateMessage = this.helpHandler.helperTemplate();
                 await this.userLineClient.replyMessage(replayToken, templateMessage);
+
                 return;
             }
 
-            const messageDbClient = new MessageDb();
+            if (userInput === "profile") {
 
-            const [userName, messageReply] = Promise.all([
-                this.userLineClient.getUserName(event),
-                messageDbClient.getMessage(inputMessage)
-            ])
+                const templateMessage = this.profileHandler.profileTemplate();
+                await this.userLineClient.replyMessage(replayToken, templateMessage);
+
+                return;
+            };
+
+            const [message, userName]= await Promise.all([
+                this.textMessageHandler.messageHandler(event.message),
+                this.userLineClient.getUserName(event)
+            ]);
+
+            if (message) {
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, message),
+                    this.hostLineClient.replyMessage(replayToken, {
+                        type: "text",
+                        text: `${userName} get a correct message!!`
+                    })
+                ])
+            }
+
+            const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
+            
 
             await Promise.all([
-                this.userLineClient.replyMessage(replayToken, {
-                    type: "text",
-                    text: inputMessage
-                }),
+                this.userLineClient.replyMessage(replayToken, incorrectMessage),
                 this.hostLineClient.broadcast({
                     type: "text",
-                    text: `${userName} < ${inputMessage}`
+                    text: `${userName} < ${event.message.text}`
                 })
             ])
 
@@ -52,8 +81,7 @@ export class Handler {
 
             const replyToken = event.replyToken;
 
-            const helper = new Helper()
-            const helpMessage = await helper.helpMessage(event);
+            const helpMessage = await this.helpHandler.helpMessage(event);
 
             await this.userLineClient.replyMessage(replyToken, helpMessage);
             return;
