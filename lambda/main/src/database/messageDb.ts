@@ -1,6 +1,9 @@
 import { DynamoDBClient, GetItemCommand, GetItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
-import { ILocationInfo, IMessageDb } from "./IMessageDb";
+import { IDateTime, ILocationInfo, IMessage, IMessageDb } from "./IMessageDb";
+
+const kindInformation = "Information";
+const kindMessage = "Message";
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -16,7 +19,10 @@ export class MessageDb implements IMessageDb {
 
         const param: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: { "Keyword": { "S": pkName } }
+            Key: { 
+                "Keyword": { "S": pkName },
+                "Kind": { "S": kindInformation }
+            }
         };
 
         const getItemCommand = new GetItemCommand(param); 
@@ -39,6 +45,64 @@ export class MessageDb implements IMessageDb {
 
         return locationInfo;
 
+    }
+
+    public async getWaddingDate(): Promise<IDateTime> {
+
+        const pkName = "WeddingSchedule";
+
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: { 
+                "Keyword": { "S": pkName },
+                "Kind": { "S" : kindInformation },
+            }
+        };
+
+        const getItemCommand = new GetItemCommand(param);
+        const dynamoOutPut = await this.client.send(getItemCommand);
+
+        if (!dynamoOutPut.Item) {
+            // TODO: update
+            throw new Error("error");
+        };
+
+        const item = unmarshall(dynamoOutPut.Item);
+
+        const dateTime: IDateTime = {
+            Date: item.Date
+        };
+
+        return dateTime
+
+    }
+
+    public async getMessage(keyword: string): Promise<IMessage | undefined> {
+
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": keyword },
+                "Kind": { "S": kindMessage }
+            }
+        }
+
+        const getItemCommand = new GetItemCommand(param);
+        const dynamoOutPut = await this.client.send(getItemCommand);
+
+        if (!dynamoOutPut.Item) {
+            return undefined;
+        };
+
+        const item = unmarshall(dynamoOutPut.Item);
+
+        const message: IMessage = {
+            Keyword: item.Keyword,
+            Name: item.Name,
+            Message: item.Message
+        };
+        
+        return message;
     }
 
 }

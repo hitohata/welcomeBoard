@@ -1,5 +1,6 @@
 type Message {
     Keyword: ID!
+    Kind: String
     Name: String
     Message: String
 }
@@ -9,6 +10,7 @@ type Query {
 }
 input MessageInput {
     Keyword: ID!
+    Kind: String,
     Name: String
     Message: String
 }

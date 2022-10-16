@@ -12,11 +12,14 @@ interface IProps extends StackProps {
 export class WelcomeBoardManagerStack extends Stack {
 
     private readonly welcomeMessageTableArn: string;
+    private readonly deployStageSuffix: string;
 
     constructor(scope: Construct, id: string, props: IProps) {
         super(scope, id, props);
 
         const { deployStageSuffix } = props;
+
+        this.deployStageSuffix = deployStageSuffix;
 
         // table
         const welcomeMessageTable = new dynamodb.Table(this, "welcomeMessageTable", {
@@ -25,19 +28,36 @@ export class WelcomeBoardManagerStack extends Stack {
                 name: "Keyword",
                 type: dynamodb.AttributeType.STRING
             },
+            sortKey: {
+                name: "Kind",
+                type: dynamodb.AttributeType.STRING
+            },
             removalPolicy: RemovalPolicy.DESTROY
+        });
+
+        welcomeMessageTable.addLocalSecondaryIndex({
+            indexName: "Kind_index",
+            sortKey: {
+                name: "Kind",
+                type: dynamodb.AttributeType.STRING
+            },
         });
 
         this.welcomeMessageTableArn = welcomeMessageTable.tableArn;
 
+        this.appSyncSetting(welcomeMessageTable.tableArn);
+
+    }
+
+    private appSyncSetting(tableArn: string) {
         const userPool = new cognito.UserPool(this, "welcomeMessageManagementUser", {
-            userPoolName: `WelcomeMessageManagementUsers${deployStageSuffix}`,
+            userPoolName: `WelcomeMessageManagementUsers${this.deployStageSuffix}`,
             removalPolicy: RemovalPolicy.DESTROY
         });
         userPool.addClient("WeddingSync");
 
         const appSyncApi = new appsync.GraphqlApi(this, "AppSyncApi", {
-            name: `welcomeMessageTableApi${deployStageSuffix}`,
+            name: `welcomeMessageTableApi${this.deployStageSuffix}`,
             schema: appsync.Schema.fromAsset(path.join(__dirname, "../graphql/schema.graphql")),
             authorizationConfig: {
                 defaultAuthorization: {
@@ -48,6 +68,8 @@ export class WelcomeBoardManagerStack extends Stack {
                 }
             },
         });
+
+        const welcomeMessageTable = dynamodb.Table.fromTableArn(this, "messageTable", tableArn);
 
         const dynamoDS = appSyncApi.addDynamoDbDataSource("dynamoDS", welcomeMessageTable);
 
@@ -81,7 +103,6 @@ export class WelcomeBoardManagerStack extends Stack {
             requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword"),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
         });
-
     }
 
     public tableArn(): string {

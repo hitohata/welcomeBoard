@@ -34,9 +34,11 @@ export class Helper {
         const postbackData = event.postback.data;
 
         if (postbackData === this.location) {
+
             const messageDbClient = new MessageDb();
             const locationData = await messageDbClient.getLocation();
-            const location: LocationMessage = {
+
+            const locationMessage: LocationMessage = {
                 type: "location",
                 title: locationData.LocationName,
                 address: locationData.Address,
@@ -44,18 +46,64 @@ export class Helper {
                 longitude: locationData.Longitude
             };
 
-            return location;
+            return locationMessage;
         };
 
         if (postbackData === this.dateTime) {
-            const dateTime = new Date().toDateString();
+
+            // wedding date time
+            const messageDbClient = new MessageDb();
+            const dateTimeData = await messageDbClient.getWaddingDate();
+            const weddingDateTime = new Date(dateTimeData.Date);
+
+            // current date time
+            const dateTime = new Date;
+            const timeOffset = 9 * 60 * 60 * 1000;
+            const jstDateTime = new Date(dateTime.setTime(dateTime.getTime() + timeOffset));
+
             const dateTimeMessage: TextMessage = {
                 type: "text",
-                text: dateTime
+                text: weddingDateDetail(weddingDateTime) + "\n" + timeDiff(weddingDateTime, jstDateTime)
             }
             return dateTimeMessage;
         }
 
         throw new Error("undefined postback event!");
     }
+}
+
+const weddingDateDetail = (weddingDateTime: Date): string => {
+
+    const receptionDateTime = `Reception: ${toDateTimeString(weddingDateTime)}`; 
+
+    const weddingCeremonyDate = new Date(weddingDateTime.setTime(weddingDateTime.getTime() + (30 * 60 * 1000)));
+    const weddingCeremony = `Wedding Ceremony: ${toDateTimeString(weddingCeremonyDate)}`;
+
+    const weddingBanquetDateTime = new Date(weddingCeremonyDate.setTime(weddingCeremonyDate.getTime() + (40 * 60 * 1000)))
+    const weddingBanquet = `Wedding Banquet: ${toDateTimeString(weddingBanquetDateTime)}`
+
+    return [receptionDateTime, weddingCeremony, weddingBanquet].join("\n");
+}
+
+const timeDiff = (weddingDateTime: Date, now: Date): string => {
+
+    console.log(weddingDateTime, now);
+
+    const diff_msec = weddingDateTime.getTime() - now.getTime()
+
+    console.log("diff", diff_msec)
+
+    if (diff_msec < 0) {
+        return "Started"
+    };
+
+    const days = Math.floor(diff_msec / (60 * 24 * 60 * 100));
+
+    return `${days} days left.`
+
+}
+
+const toDateTimeString = (dateTime: Date): string => {
+    console.log(dateTime);
+    return `${dateTime.getFullYear()}/${dateTime.getMonth() + 1}/${dateTime.getDate()} ${String(dateTime.getHours()).padStart(2, "0")}:${String(dateTime.getMinutes()).padStart(2, "0")}:${String(dateTime.getSeconds()).padStart(2, "0")}`
 }

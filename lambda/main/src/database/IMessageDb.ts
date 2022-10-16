@@ -17,6 +17,6 @@ export interface IMessage {
 
 export interface IMessageDb {
     getLocation(): Promise<ILocationInfo>
-    // getWaddingDate(): Promise<IDateTime>
-    // getMessage(): Promise<IMessage | undefined>
+    getWaddingDate(): Promise<IDateTime>
+    getMessage(keyword: string): Promise<IMessage | undefined>
 };

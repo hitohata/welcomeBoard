@@ -2,6 +2,7 @@ import { Client, validateSignature, WebhookEvent, MessageEvent, PostbackEvent, M
 import { Settings } from "settings/settings";
 import { HostLineClient, UserLineClient } from "./lineClients";
 import { Helper } from "./Handlers/help";
+import { MessageDb } from "database/messageDb";
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
@@ -27,7 +28,12 @@ export class Handler {
                 return;
             }
 
-            const userName = await this.userLineClient.getUserName(event);
+            const messageDbClient = new MessageDb();
+
+            const [userName, messageReply] = Promise.all([
+                this.userLineClient.getUserName(event),
+                messageDbClient.getMessage(inputMessage)
+            ])
 
             await Promise.all([
                 this.userLineClient.replyMessage(replayToken, {
