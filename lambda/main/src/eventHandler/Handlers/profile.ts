@@ -5,14 +5,17 @@ export interface IProfileHandler {
   profileTemplate(): TemplateMessage
   groomProfileMessage(): Promise<Message>
   brideProfileMessage(): Promise<Message>
+  groomProfile: string
+  brideProfile: string
 }
 
 export class ProfileHandler implements IProfileHandler {
 
-  private readonly groomProfile = "groomProfile";
-  private readonly brideProfile = "brideProfile";
+  private readonly _groomProfile = "groomProfile";
+  private readonly _brideProfile = "brideProfile";
 
   private readonly messageDb: IMessageDb;
+
   constructor(messageDb: IMessageDb) {
     this.messageDb = messageDb;
   };
@@ -29,12 +32,12 @@ export class ProfileHandler implements IProfileHandler {
           {
             type: "postback",
             label: "Groom",
-            data: this.groomProfile
+            data: this._groomProfile
           },
           {
             type: "postback",
             label: "Bride",
-            data: this.brideProfile
+            data: this._brideProfile
           }
         ]
       }
@@ -46,7 +49,7 @@ export class ProfileHandler implements IProfileHandler {
   public async groomProfileMessage(): Promise<Message> {
     return {
       type: "text",
-      text: "TODO"
+      text: "TODO: groom profile"
     }
   }
 
@@ -55,5 +58,13 @@ export class ProfileHandler implements IProfileHandler {
       type: "text",
       text: "TODO"
     }
+  }
+
+  get groomProfile(): string {
+    return this._groomProfile;
+  }
+
+  get brideProfile(): string {
+    return this._brideProfile;
   }
 }

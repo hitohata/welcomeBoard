@@ -94,6 +94,14 @@ export class Handler {
 
             if (postBackData === this.helpHandler.dateTime) {
                 message = await this.helpHandler.dateTimeInformation();
+            };
+
+            if (postBackData === this.profileHandler.brideProfile) {
+                message = await this.profileHandler.brideProfileMessage()
+            };
+
+            if (postBackData === this.profileHandler.brideProfile) {
+                message = await this.profileHandler.brideProfileMessage();
             }
 
             await this.userLineClient.replyMessage(replyToken, message);
