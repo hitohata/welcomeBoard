@@ -2,9 +2,7 @@ import { Client, validateSignature, WebhookEvent, MessageEvent } from "@line/bot
 import { Settings } from "settings/settings";
 
 
-export class LineClient {
-
-    private lineClient: Client;
+export class UserLineClient extends Client {
 
     constructor (signature?: string, body?: string | null) {
 
@@ -24,10 +22,10 @@ export class LineClient {
             throw new Error("Invalid signature.");
         };
 
-        this.lineClient = new Client({
+        super({
             channelAccessToken: userChannelConfig.channelAccessToken,
             channelSecret: userChannelConfig.channelSecret
-        });
+        })
     };
 
     /**
@@ -35,11 +33,21 @@ export class LineClient {
      * @param event 
      * @returns 
      */
-    private async getUserName(event: MessageEvent): Promise<string> {
+    public async getUserName(event: MessageEvent): Promise<string> {
 
         const userId = event.source.userId; 
-        const userProfile = await this.lineClient.getProfile(userId!);
+        const userProfile = await this.getProfile(userId!);
         return userProfile.displayName;
-    }   
+    }
 
+}
+
+export class HostLineClient extends Client {
+    constructor() {
+        const hostChannelConfig = Settings.create().hostChannelConfig;
+        super({
+            channelAccessToken: hostChannelConfig.channelAccessToken,
+            channelSecret: hostChannelConfig.channelSecret
+        })
+    }
 }

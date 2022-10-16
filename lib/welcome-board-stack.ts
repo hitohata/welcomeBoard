@@ -34,7 +34,9 @@ export class WelcomeBoardStack extends Stack {
           CHANNEL_SECRET: channelSecret,
           CHANNEL_TOKEN: channelToken,
           MANAGER_CHANNEL_SECRET: managerChannelSecret,
-          MANAGER_CHANNEL_TOKEN: managerChannelToken
+          MANAGER_CHANNEL_TOKEN: managerChannelToken,
+          TABLE_NAME: messageTable.tableName,
+          REGION: this.region
         }
       },
     );

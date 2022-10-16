@@ -13,6 +13,8 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.188.0",
+    "@aws-sdk/util-dynamodb": "^3.188.0",
     "@line/bot-sdk": "^7.5.2"
   }
 }

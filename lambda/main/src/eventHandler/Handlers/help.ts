@@ -1,4 +1,5 @@
 import { LocationMessage, Message, PostbackEvent, TemplateMessage, TextMessage } from "@line/bot-sdk";
+import { MessageDb } from "database/messageDb";
 
 export class Helper {
     private readonly location = "location";
@@ -29,16 +30,18 @@ export class Helper {
         return helperTemplate;
     };
 
-    public helpMessage(event: PostbackEvent): Message {
+    public async helpMessage(event: PostbackEvent): Promise<Message> {
         const postbackData = event.postback.data;
 
         if (postbackData === this.location) {
+            const messageDbClient = new MessageDb();
+            const locationData = await messageDbClient.getLocation();
             const location: LocationMessage = {
                 type: "location",
-                title: "dummy",
-                address: "here",
-                latitude: 4.671551542536234,
-                longitude: -160.37976231284628
+                title: locationData.LocationName,
+                address: locationData.Address,
+                latitude: locationData.Latitude,
+                longitude: locationData.Longitude
             };
 
             return location;

@@ -33,7 +33,7 @@ export class Settings {
         }
     }
 
-    public get managerChannelConfig() {
+    public get hostChannelConfig() {
         return {
             channelSecret: this.managerChannelSecret,
             channelAccessToken: this.managerChannelToken
