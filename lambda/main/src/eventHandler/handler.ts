@@ -1,4 +1,4 @@
-import { WebhookEvent } from "@line/bot-sdk";
+import { WebhookEvent, Message } from "@line/bot-sdk";
 import { HostLineClient, UserLineClient } from "./lineClients";
 import { IProfileHandler } from "./Handlers/profile";
 import { IHelperHandler } from "./Handlers/help";
@@ -81,9 +81,22 @@ export class Handler {
 
             const replyToken = event.replyToken;
 
-            const helpMessage = await this.helpHandler.helpMessage(event);
+            const postBackData = event.postback.data;
 
-            await this.userLineClient.replyMessage(replyToken, helpMessage);
+            let message: Message = {
+                type: "text",
+                text: "Not Found"
+            }
+
+            if (postBackData === this.helpHandler.location) {
+                message = await this.helpHandler.locationInformation();
+            };
+
+            if (postBackData === this.helpHandler.dateTime) {
+                message = await this.helpHandler.dateTimeInformation();
+            }
+
+            await this.userLineClient.replyMessage(replyToken, message);
             return;
         }
     };

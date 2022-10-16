@@ -1,14 +1,17 @@
-import { LocationMessage, Message, PostbackEvent, TemplateMessage, TextMessage } from "@line/bot-sdk";
+import { LocationMessage, Message, TemplateMessage, TextMessage } from "@line/bot-sdk";
 import { IMessageDb } from "database/IMessageDb";
 
 export interface IHelperHandler {
     helperTemplate(): TemplateMessage
-    helpMessage(event: PostbackEvent): Promise<Message>
+    locationInformation(): Promise<Message>,
+    dateTimeInformation(): Promise<Message>,
+    location: string,
+    dateTime: string
 }
 
 export class HelperHandler {
-    private readonly location = "location";
-    private readonly dateTime = "dateTime";
+    private readonly _location = "location";
+    private readonly _dateTime = "dateTime";
     private readonly messageDb: IMessageDb;
 
     constructor(messageDb: IMessageDb) {
@@ -27,12 +30,12 @@ export class HelperHandler {
                     {
                         type: "postback",
                         label: "Location",
-                        data: this.location,
+                        data: this._location,
                     },
                     {
                         type: "postback",
                         label: "DateTime",
-                        data: this.dateTime
+                        data: this._dateTime
                     }
                 ]
             }
@@ -40,44 +43,46 @@ export class HelperHandler {
         return helperTemplate;
     };
 
-    public async helpMessage(event: PostbackEvent): Promise<Message> {
-        const postbackData = event.postback.data;
+    public async locationInformation(): Promise<Message> {
+        const locationData = await this.messageDb.getLocation();
 
-        if (postbackData === this.location) {
-
-            const locationData = await this.messageDb.getLocation();
-
-            const locationMessage: LocationMessage = {
-                type: "location",
-                title: locationData.LocationName,
-                address: locationData.Address,
-                latitude: locationData.Latitude,
-                longitude: locationData.Longitude
-            };
-
-            return locationMessage;
+        const locationMessage: LocationMessage = {
+            type: "location",
+            title: locationData.LocationName,
+            address: locationData.Address,
+            latitude: locationData.Latitude,
+            longitude: locationData.Longitude
         };
 
-        if (postbackData === this.dateTime) {
-
-            // wedding date time
-            const dateTimeData = await this.messageDb.getWaddingDate();
-            const weddingDateTime = new Date(dateTimeData.Date);
-
-            // current date time
-            const dateTime = new Date;
-            const timeOffset = 9 * 60 * 60 * 1000;
-            const jstDateTime = new Date(dateTime.setTime(dateTime.getTime() + timeOffset));
-
-            const dateTimeMessage: TextMessage = {
-                type: "text",
-                text: weddingDateDetail(weddingDateTime) + "\n" + timeDiff(weddingDateTime, jstDateTime)
-            }
-            return dateTimeMessage;
-        }
-
-        throw new Error("undefined postback event!");
+        return locationMessage;
     }
+
+    public async dateTimeInformation(): Promise<Message> {
+
+        // wedding date time
+        const dateTimeData = await this.messageDb.getWaddingDate();
+        const weddingDateTime = new Date(dateTimeData.Date);
+
+        // current date time
+        const dateTime = new Date;
+        const timeOffset = 9 * 60 * 60 * 1000;
+        const jstDateTime = new Date(dateTime.setTime(dateTime.getTime() + timeOffset));
+
+        const dateTimeMessage: TextMessage = {
+            type: "text",
+            text: weddingDateDetail(weddingDateTime) + "\n" + timeDiff(weddingDateTime, jstDateTime)
+        }
+        return dateTimeMessage;
+    }
+
+    get location(): string {
+        return this._location;
+    }
+
+    get dateTime(): string {
+        return this._dateTime;
+    }
+
 }
 
 const weddingDateDetail = (weddingDateTime: Date): string => {
