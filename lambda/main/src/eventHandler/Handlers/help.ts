@@ -100,17 +100,13 @@ const weddingDateDetail = (weddingDateTime: Date): string => {
 
 const timeDiff = (weddingDateTime: Date, now: Date): string => {
 
-    console.log(weddingDateTime, now);
-
     const diff_msec = weddingDateTime.getTime() - now.getTime()
-
-    console.log("diff", diff_msec)
 
     if (diff_msec < 0) {
         return "Started"
     };
 
-    const days = Math.floor(diff_msec / (60 * 24 * 60 * 100));
+    const days = Math.floor(diff_msec / (60 * 24 * 60 * 1000));
 
     return `${days} days left.`
 

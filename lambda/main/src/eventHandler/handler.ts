@@ -1,4 +1,4 @@
-import { WebhookEvent, Message } from "@line/bot-sdk";
+import { WebhookEvent, Message, TextMessage } from "@line/bot-sdk";
 import { HostLineClient, UserLineClient } from "./lineClients";
 import { IProfileHandler } from "./Handlers/profile";
 import { IHelperHandler } from "./Handlers/help";
@@ -55,17 +55,21 @@ export class Handler {
             ]);
 
             if (message) {
+
+                const correctMessage: TextMessage = {
+                    type: "text",
+                    text: `${userName} gets a correct message!!`
+                };
+
                 await Promise.all([
                     this.userLineClient.replyMessage(replayToken, message),
-                    this.hostLineClient.replyMessage(replayToken, {
-                        type: "text",
-                        text: `${userName} get a correct message!!`
-                    })
-                ])
+                    this.hostLineClient.broadcast(correctMessage)
+                ]);
+
+                return;
             }
 
             const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
-            
 
             await Promise.all([
                 this.userLineClient.replyMessage(replayToken, incorrectMessage),
@@ -96,8 +100,8 @@ export class Handler {
                 message = await this.helpHandler.dateTimeInformation();
             };
 
-            if (postBackData === this.profileHandler.brideProfile) {
-                message = await this.profileHandler.brideProfileMessage()
+            if (postBackData === this.profileHandler.groomProfile) {
+                message = await this.profileHandler.groomProfileMessage()
             };
 
             if (postBackData === this.profileHandler.brideProfile) {
