@@ -1,5 +1,5 @@
 import { Message, TemplateMessage } from "@line/bot-sdk";
-import { IMessageDb } from "database/IMessageDb";
+import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
 export interface IProfileHandler {
   profileTemplate(): TemplateMessage

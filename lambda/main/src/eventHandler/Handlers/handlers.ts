@@ -1,7 +1,7 @@
 import { HelperHandler } from "./help";
 import { TextMessageHandler } from "./textMessage";
 import { ProfileHandler } from "./profile";
-import { IMessageDb } from "database/IMessageDb";
+import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
 export const handlersFactory = (messageDb: IMessageDb) => {
     return {
