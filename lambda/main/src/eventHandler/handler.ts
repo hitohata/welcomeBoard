@@ -3,7 +3,7 @@ import { HostLineClient, UserLineClient } from "./lineClients";
 import { IProfileHandler } from "./Handlers/profile";
 import { IHelperHandler } from "./Handlers/help";
 import { ITextMessageHandler } from "./Handlers/textMessage";
-import { emitWarning } from "process";
+import { ImageHandler } from "./Handlers/image";
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
@@ -11,36 +11,48 @@ export class Handler {
     private readonly helpHandler: IHelperHandler;
     private readonly profileHandler: IProfileHandler;
     private readonly textMessageHandler: ITextMessageHandler
+    private readonly imageHandler: ImageHandler;
 
     constructor(
-        userLineClient: UserLineClient, 
+        userLineClient: UserLineClient,
         hostLineClient: HostLineClient,
         helperHandler: IHelperHandler,
         profileHandler: IProfileHandler,
-        textMessageHandler: ITextMessageHandler
+        textMessageHandler: ITextMessageHandler,
+        imageHandler: ImageHandler,
     ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
         this.helpHandler = helperHandler;
         this.profileHandler = profileHandler;
         this.textMessageHandler = textMessageHandler;
+        this.imageHandler = imageHandler;
     }
 
     public async checkEvent(event: WebhookEvent) {
 
-        if (event.type === "message" && event.message.type === "text") {
-            await this.textMessageHandling(event);
-        }
+        if (event.type === "message") {
+            if (event.message.type === "text") {
+                await this.textMessageHandling(event);
+                return;
+            };
+
+            if (event.message.type === "image") {
+                await this.imageHandler.handleImage(event.message);
+                return;
+            }
+        };
 
         if (event.type === "postback") {
             await this.postbackEventHandling(event);
+            return;
         }
     };
 
     /**
      * replay message
      * @param event MessageEvent
-     * @returns 
+     * @returns
      */
     private async textMessageHandling(event: MessageEvent): Promise<void> {
 

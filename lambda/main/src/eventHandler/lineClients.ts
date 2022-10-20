@@ -1,4 +1,4 @@
-import { Client, validateSignature, WebhookEvent, MessageEvent } from "@line/bot-sdk";
+import { Client, validateSignature, MessageEvent } from "@line/bot-sdk";
 import { Settings } from "settings/settings";
 
 

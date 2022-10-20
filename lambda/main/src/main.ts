@@ -13,25 +13,22 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
     const hostClient = new HostLineClient();
 
-    const handlers = handlersFactory(new MessageDb());
+    const handlers = handlersFactory(new MessageDb(), lineClient);
 
     const handler = new Handler(
-        lineClient, 
-        hostClient, 
-        handlers.helperHandler, 
-        handlers.profileHandler, 
-        handlers.textMessageHandler
+        lineClient,
+        hostClient,
+        handlers.helperHandler,
+        handlers.profileHandler,
+        handlers.textMessageHandler,
+        handlers.imageHandler
     );
 
     const body: WebhookRequestBody = JSON.parse(event.body!);
 
-    // console.log(body);
-
-    // body.events.map(async el => {
-    //     if (el.type === "message" && el.message.type === "image") {
-    //         const image = await lineClient.getMessageContent(el.message.id);
-    //     }
-    // })
+    body.events.map(el => {
+        console.log(el);
+    })
 
     await Promise.all(body.events.map(el => handler.checkEvent(el)));
 

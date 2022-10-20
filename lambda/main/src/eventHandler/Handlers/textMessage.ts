@@ -1,4 +1,4 @@
-import { Message, TextEventMessage, TextMessage } from "@line/bot-sdk";
+import { Message, TextEventMessage } from "@line/bot-sdk";
 import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
 export interface ITextMessageHandler {
@@ -9,7 +9,7 @@ export interface ITextMessageHandler {
 export class TextMessageHandler implements ITextMessageHandler {
 
     private readonly messageDbClient: IMessageDb;
-    
+
     constructor(
         messageDbClient: IMessageDb,
     ) {
