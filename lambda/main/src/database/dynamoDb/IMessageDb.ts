@@ -15,8 +15,14 @@ export interface IMessage {
     Message: string
 }
 
+export interface IProfile {
+    Profile: string
+}
+
 export interface IMessageDb {
     getLocation(): Promise<ILocationInfo>
     getWaddingDate(): Promise<IDateTime>
     getMessage(keyword: string): Promise<IMessage | undefined>
+    getBrideProfile(): Promise<IProfile>
+    getGroomProfile(): Promise<IProfile>
 };

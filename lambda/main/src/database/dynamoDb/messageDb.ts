@@ -1,6 +1,6 @@
 import { DynamoDBClient, GetItemCommand, GetItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
-import { IDateTime, ILocationInfo, IMessage, IMessageDb } from "./IMessageDb";
+import { IDateTime, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -31,8 +31,7 @@ export class MessageDb implements IMessageDb {
         const dynamoOutPut = await this.client.send(getItemCommand);
 
         if (!dynamoOutPut.Item) {
-            // TODO: update
-            throw new Error("get item error");
+            throw new Error("fetching location information failed.");
         }; 
 
         const item = unmarshall(dynamoOutPut.Item);
@@ -64,8 +63,7 @@ export class MessageDb implements IMessageDb {
         const dynamoOutPut = await this.client.send(getItemCommand);
 
         if (!dynamoOutPut.Item) {
-            // TODO: update
-            throw new Error("error");
+            throw new Error("fetching wedding date failed.");
         };
 
         const item = unmarshall(dynamoOutPut.Item);
@@ -104,6 +102,53 @@ export class MessageDb implements IMessageDb {
         };
         
         return message;
-    }
+    };
 
+    public async getBrideProfile(): Promise<IProfile> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "BrideProfile" },
+                "Kind": { "S": "Profile" }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const brideProfile = await this.client.send(getCommand);
+
+        if (!brideProfile.Item) {
+            throw new Error("Bride profile is not found.");
+        }
+
+        const item = unmarshall(brideProfile.Item);
+
+        return {
+            Profile: item.Profile
+        };
+
+    };
+
+    public async getGroomProfile(): Promise<IProfile> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "GroomProfile" },
+                "Kind": { "S": "Profile" }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const groomProfile = await this.client.send(getCommand);
+
+        if (!groomProfile.Item) {
+            throw new Error("Bride profile is not found.");
+        }
+
+        const item = unmarshall(groomProfile.Item);
+
+        return {
+            Profile: item.Profile
+        };
+
+    };
 }

@@ -47,16 +47,18 @@ export class ProfileHandler implements IProfileHandler {
   };
 
   public async groomProfileMessage(): Promise<Message> {
+    const groomProfile = await this.messageDb.getGroomProfile();
     return {
       type: "text",
-      text: "TODO: groom profile"
+      text: groomProfile.Profile
     }
   }
 
   public async brideProfileMessage(): Promise<Message> {
+    const brideProfile = await this.messageDb.getBrideProfile();
     return {
       type: "text",
-      text: "TODO"
+      text: brideProfile.Profile
     }
   }
 
