@@ -65,8 +65,7 @@ export class TextMessageHandler implements ITextMessageHandler {
         } else {
             switch (seed) {
                 case 1: {
-                    const length = incorrectMessage.length;
-                    message = `入力した文字は${length}でした。\nちがいます。`;
+                    message = `入力した文字は${incorrectMessage}でした。\nちがいます。`;
                     break;
                 }
                 case 2: {
