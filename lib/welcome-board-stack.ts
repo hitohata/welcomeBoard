@@ -25,7 +25,6 @@ export class WelcomeBoardStack extends Stack {
 
     const imageContentsBucket = new s3.Bucket(this, "imageContentBucket", {
       bucketName: `wedding-image-bucket${stageSuffix}`,
-      
     });
 
     const messageFunction = new nodeLambda.NodejsFunction(
@@ -48,18 +47,41 @@ export class WelcomeBoardStack extends Stack {
       },
     );
 
+    const hostMessageFunction = new nodeLambda.NodejsFunction(
+      this,
+      "hostMessageFunction",
+      {
+        functionName: `hostMessageFunction${stageSuffix}`,
+        entry: path.join(__dirname, "../lambda/hostFunction/src/main.ts"),
+        handler: "lambdaHandler",
+        timeout: Duration.seconds(10),
+        environment: {
+          CHANNEL_SECRET: channelSecret,
+          CHANNEL_TOKEN: channelToken,
+          MANAGER_CHANNEL_SECRET: managerChannelSecret,
+          MANAGER_CHANNEL_TOKEN: managerChannelToken,
+        }
+      }
+    );
+
     messageTable.grantReadData(messageFunction);
     imageContentsBucket.grantReadWrite(messageFunction);
 
-    const api = new apiGateway.LambdaRestApi(this, "apiGateway", {
-      restApiName: `WelcomeMessageAPI${stageSuffix}`,
-      handler: messageFunction,
-      proxy: false
-    });
+    // const api = new apiGateway.LambdaRestApi(this, "apiGateway", {
+    //   restApiName: `WelcomeMessageAPI${stageSuffix}`,
+    //   handler: messageFunction,
+    //   proxy: false
+    // });
 
-    const lineWebHook = api.root.addResource("callback");
+    const api = new apiGateway.RestApi(this, "lineWebhookApi");
 
-    lineWebHook.addMethod("POST");
+    const gestApi = api.root.addResource("gest");
+    const gestFunctionIntegration = new apiGateway.LambdaIntegration(messageFunction);
+    gestApi.addMethod("POST", gestFunctionIntegration);
+
+    const hostLineWebHook = api.root.addResource("host");
+    const hostLineFunctionIntegration = new apiGateway.LambdaIntegration(hostMessageFunction);
+    hostLineWebHook.addMethod("POST", hostLineFunctionIntegration);
 
   }
 }

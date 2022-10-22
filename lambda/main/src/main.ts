@@ -36,25 +36,23 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
     const body: WebhookRequestBody = JSON.parse(event.body!);
 
-    body.events.map(el => {
-        console.log(el);
-    })
-
     try {
         await Promise.all(body.events.map(el => handler.checkEvent(el)));
     } catch (error) {
+
+        console.error(error);
+    
         if (error instanceof Error) {
-            hostClient.broadcast({
+            await hostClient.broadcast({
                 type: "text",
                 text: error.message
             });
         }
 
-        hostClient.broadcast({
+        await hostClient.broadcast({
             type: "text",
             text: `Unexpected error occurred./n ${error}`
         })
-        
     }
 
 
