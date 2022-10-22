@@ -67,12 +67,6 @@ export class WelcomeBoardStack extends Stack {
     messageTable.grantReadData(messageFunction);
     imageContentsBucket.grantReadWrite(messageFunction);
 
-    // const api = new apiGateway.LambdaRestApi(this, "apiGateway", {
-    //   restApiName: `WelcomeMessageAPI${stageSuffix}`,
-    //   handler: messageFunction,
-    //   proxy: false
-    // });
-
     const api = new apiGateway.RestApi(this, "lineWebhookApi");
 
     const gestApi = api.root.addResource("gest");
