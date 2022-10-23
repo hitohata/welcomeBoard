@@ -44,7 +44,7 @@ export class Handler {
 
             // replay sticker
             if (event.message.type === "sticker") {
-                const replyStickerMessage = this.stickerHandler.getNegativeStickerMessage();
+                const replyStickerMessage = this.stickerHandler.getPositiveStickerMessage();
                 await this.userLineClient.replyMessage(event.replyToken, replyStickerMessage)
                 return;
             }
