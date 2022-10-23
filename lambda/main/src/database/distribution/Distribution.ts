@@ -1,6 +1,6 @@
 import { IDistribution } from "./IDistribution";
 
-class Distribution implements IDistribution {
+export class Distribution implements IDistribution {
 
     private readonly distribution: string;
 
@@ -9,6 +9,10 @@ class Distribution implements IDistribution {
     }
 
     public getMenuUri(): string {
-        return `${this.distribution}/information/menu.jpg`
+        return `${this.distribution}/information-folder/line-image/menu.jpg`
     };
+
+    public getSeatingChartUrl(): string {
+        return `${this.distribution}/information-folder/line-image/seating-chart.jpg`
+    }
 }

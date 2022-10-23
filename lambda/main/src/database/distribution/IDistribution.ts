@@ -1,3 +1,4 @@
 export interface IDistribution {
-    getMenuUri(): string
+    getMenuUri(): string,
+    getSeatingChartUrl(): string
 }

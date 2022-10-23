@@ -1,32 +1,28 @@
 import { WebhookEvent, Message, TextMessage, MessageEvent, PostbackEvent } from "@line/bot-sdk";
 import { HostLineClient, UserLineClient } from "./lineClients";
-import { IProfileHandler } from "./Handlers/profile";
-import { IHelperHandler } from "./Handlers/help";
 import { ITextMessageHandler } from "./Handlers/textMessage";
 import { ImageHandler } from "./Handlers/image";
+import { IInformationHandler } from "./Handlers/informationHandler";
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
     private readonly hostLineClient: HostLineClient;
-    private readonly helpHandler: IHelperHandler;
-    private readonly profileHandler: IProfileHandler;
     private readonly textMessageHandler: ITextMessageHandler
     private readonly imageHandler: ImageHandler;
+    private readonly informationHandler: IInformationHandler;
 
     constructor(
         userLineClient: UserLineClient,
         hostLineClient: HostLineClient,
-        helperHandler: IHelperHandler,
-        profileHandler: IProfileHandler,
         textMessageHandler: ITextMessageHandler,
         imageHandler: ImageHandler,
+        informationHandler: IInformationHandler
     ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
-        this.helpHandler = helperHandler;
-        this.profileHandler = profileHandler;
         this.textMessageHandler = textMessageHandler;
         this.imageHandler = imageHandler;
+        this.informationHandler = informationHandler;
     }
 
     public async checkEvent(event: WebhookEvent) {
@@ -63,22 +59,6 @@ export class Handler {
         }
 
         const userInput = event.message.text;
-
-        if (userInput === "help") {
-
-            const templateMessage = this.helpHandler.helperTemplate();
-            await this.userLineClient.replyMessage(replayToken, templateMessage);
-
-            return;
-        }
-
-        if (userInput === "profile") {
-
-            const templateMessage = this.profileHandler.profileTemplate();
-            await this.userLineClient.replyMessage(replayToken, templateMessage);
-
-            return;
-        };
 
         const [message, userName]= await Promise.all([
             this.textMessageHandler.messageHandler(event.message),
@@ -121,21 +101,29 @@ export class Handler {
             text: "Not Found"
         };
 
-        if (postBackData === this.helpHandler.location) {
-            message = await this.helpHandler.locationInformation();
+        if (postBackData === this.informationHandler.location) {
+            message = await this.informationHandler.locationInformation();
         };
 
-        if (postBackData === this.helpHandler.dateTime) {
-            message = await this.helpHandler.dateTimeInformation();
+        if (postBackData === this.informationHandler.dateTime) {
+            message = await this.informationHandler.dateTimeInformation();
         };
 
-        if (postBackData === this.profileHandler.groomProfile) {
-            message = await this.profileHandler.getGroomProfileMessage();
+        if (postBackData === this.informationHandler.groomProfile) {
+            message = await this.informationHandler.getGroomProfileMessage();
         };
 
-        if (postBackData === this.profileHandler.brideProfile) {
-            message = await this.profileHandler.getBrideProfileMessage();
+        if (postBackData === this.informationHandler.brideProfile) {
+            message = await this.informationHandler.getBrideProfileMessage();
         };
+
+        if (postBackData === this.informationHandler.menu) {
+            message = this.informationHandler.menuImageMessage();
+        };
+
+        if (postBackData === this.informationHandler.seatingChart) {
+            message = this.informationHandler.seatingChartImageMessage();
+        }
 
         await this.userLineClient.replyMessage(replyToken, message);
         return;

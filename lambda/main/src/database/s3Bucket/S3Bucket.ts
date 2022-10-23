@@ -1,9 +1,9 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, GetObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Readable } from "node:stream";
 
 export class S3ImageBucket {
-    private readonly client: S3Client; 
+    private readonly client: S3Client;
     private readonly bucketName: string;
 
     constructor() {

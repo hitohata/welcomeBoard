@@ -20,19 +20,19 @@ export class MessageDb implements IMessageDb {
 
         const param: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: { 
+            Key: {
                 "Keyword": { "S": pkName },
                 "Kind": { "S": this.kindInformation }
             }
         };
 
-        const getItemCommand = new GetItemCommand(param); 
+        const getItemCommand = new GetItemCommand(param);
 
         const dynamoOutPut = await this.client.send(getItemCommand);
 
         if (!dynamoOutPut.Item) {
             throw new Error("fetching location information failed.");
-        }; 
+        };
 
         const item = unmarshall(dynamoOutPut.Item);
 
@@ -53,7 +53,7 @@ export class MessageDb implements IMessageDb {
 
         const param: GetItemCommandInput = {
             TableName: this.tableName,
-            Key: { 
+            Key: {
                 "Keyword": { "S": pkName },
                 "Kind": { "S" : this.kindInformation },
             }
@@ -100,7 +100,7 @@ export class MessageDb implements IMessageDb {
             Name: item.Name,
             Message: item.Message
         };
-        
+
         return message;
     };
 
@@ -113,8 +113,12 @@ export class MessageDb implements IMessageDb {
             }
         };
 
+        console.log(param);
+
         const getCommand = new GetItemCommand(param);
         const brideProfile = await this.client.send(getCommand);
+
+        console.log(brideProfile);
 
         if (!brideProfile.Item) {
             throw new Error("Bride profile is not found.");

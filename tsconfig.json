@@ -27,6 +27,7 @@
     "node_modules",
     "cdk.out",
     "manager-console",
-    "lambda"
+    "lambda",
+    "tools"
   ]
 }
