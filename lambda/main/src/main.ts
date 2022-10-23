@@ -4,6 +4,7 @@ import { HostLineClient, UserLineClient } from "eventHandler/lineClients";
 import { Handler } from "eventHandler/handler";
 import { handlersFactory } from "eventHandler/Handlers/handlers";
 import { MessageDb } from "database/dynamoDb/messageDb";
+import { VideoHandler } from "eventHandler/Handlers/videoHandler";
 
 export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
@@ -21,6 +22,7 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
         hostClient,
         handlers.textMessageHandler,
         handlers.imageHandler,
+        handlers.videoHandler,
         handlers.informationHandler,
         handlers.stickerHandler
     );

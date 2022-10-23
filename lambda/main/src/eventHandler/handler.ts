@@ -4,12 +4,19 @@ import { ITextMessageHandler } from "./Handlers/textMessage";
 import { ImageHandler } from "./Handlers/image";
 import { IInformationHandler } from "./Handlers/informationHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
+import { IVideoHandler } from "./Handlers/videoHandler";
+
+interface IReplayMessage {
+    userReplay: Message | Message[],
+    hostBroadcast: Message | Message[] 
+}
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
     private readonly hostLineClient: HostLineClient;
     private readonly textMessageHandler: ITextMessageHandler
     private readonly imageHandler: ImageHandler;
+    private readonly videoHandler: IVideoHandler;
     private readonly informationHandler: IInformationHandler;
     private readonly stickerHandler: IStickerHandler;
 
@@ -18,6 +25,7 @@ export class Handler {
         hostLineClient: HostLineClient,
         textMessageHandler: ITextMessageHandler,
         imageHandler: ImageHandler,
+        videoHandler: IVideoHandler,
         informationHandler: IInformationHandler,
         stickerHandler: IStickerHandler
     ) {
@@ -25,6 +33,7 @@ export class Handler {
         this.hostLineClient = hostLineClient;
         this.textMessageHandler = textMessageHandler;
         this.imageHandler = imageHandler;
+        this.videoHandler = videoHandler;
         this.informationHandler = informationHandler;
         this.stickerHandler = stickerHandler;
     }
@@ -32,28 +41,52 @@ export class Handler {
     public async checkEvent(event: WebhookEvent): Promise<void> {
 
         if (event.type === "message") {
+            const replayToken = event.replyToken;
+
             if (event.message.type === "text") {
-                await this.textMessageHandling(event);
-                return;
+                const message = await this.textMessageHandling(event);
+                if (message) {
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, message.userReplay),
+                    this.hostLineClient.broadcast(message.hostBroadcast)
+                ])}
             };
 
             if (event.message.type === "image") {
                 await this.imageHandler.handleImage(event.message);
+                return;
+            };
+
+            if (event.message.type === "video" && event.message.contentProvider.type === "line") {
+                await this.videoHandler.handleVideo(event.message);
                 return;
             }
 
             // replay sticker
             if (event.message.type === "sticker") {
                 const replyStickerMessage = this.stickerHandler.getPositiveStickerMessage();
+
                 await this.userLineClient.replyMessage(event.replyToken, replyStickerMessage)
                 return;
             }
         };
 
         if (event.type === "postback") {
-            await this.postbackEventHandling(event);
-            return;
-        }
+            const replayToken = event.replyToken;
+            const message = await this.postbackEventHandling(event);
+            if (message) {
+                await this.userLineClient.replyMessage(replayToken, message)
+            }
+        };
+
+        console.error(event);
+
+        this.hostLineClient.broadcast({
+            type: "text",
+            text: event.toString()
+        })
+
+        return;
     };
 
     /**
@@ -61,9 +94,7 @@ export class Handler {
      * @param event MessageEvent
      * @returns
      */
-    private async textMessageHandling(event: MessageEvent): Promise<void> {
-
-        const replayToken = event.replyToken;
+    private async textMessageHandling(event: MessageEvent): Promise<IReplayMessage | undefined> {
 
         if (event.message.type !== "text") {
             throw new Error("Not a text");
@@ -82,66 +113,58 @@ export class Handler {
                 text: `${userName} gets a correct message!!`
             };
 
-            await Promise.all([
-                this.userLineClient.replyMessage(replayToken, message),
-                this.hostLineClient.broadcast(correctMessage)
-            ]);
-
-            return;
+            return {
+                userReplay: message,
+                hostBroadcast: correctMessage
+            }
         }
 
         const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
         const negativeSticker = this.stickerHandler.getNegativeStickerMessage()
 
-        await Promise.all([
-            this.userLineClient.replyMessage(replayToken, [
-                negativeSticker,
-                incorrectMessage
-            ]),
-            this.hostLineClient.broadcast({
+        const toHostMessage: TextMessage = {
                 type: "text",
                 text: `${userName} < ${event.message.text}`
-            })
-        ])
+            }
+
+        return {
+            userReplay: [negativeSticker, incorrectMessage],
+            hostBroadcast: toHostMessage
+        }
+
     }
 
     // return information
-    private async postbackEventHandling(event: PostbackEvent): Promise<void> {
+    private async postbackEventHandling(event: PostbackEvent): Promise<Message | Message[] | undefined> {
         const replyToken = event.replyToken;
 
         const postBackData = event.postback.data;
 
-        let message: Message | Message[] = {
-            type: "text",
-            text: "Not Found"
-        };
-
         if (postBackData === this.informationHandler.location) {
-            message = await this.informationHandler.locationInformation();
+            return await this.informationHandler.locationInformation();
         };
 
         if (postBackData === this.informationHandler.dateTime) {
-            message = await this.informationHandler.dateTimeInformation();
+            return await this.informationHandler.dateTimeInformation();
         };
 
         if (postBackData === this.informationHandler.groomProfile) {
-            message = await this.informationHandler.getGroomProfileMessage();
+            return await this.informationHandler.getGroomProfileMessage();
         };
 
         if (postBackData === this.informationHandler.brideProfile) {
-            message = await this.informationHandler.getBrideProfileMessage();
+            return await this.informationHandler.getBrideProfileMessage();
         };
 
         if (postBackData === this.informationHandler.menu) {
-            message = this.informationHandler.menuImageMessage();
+            return this.informationHandler.menuImageMessage();
         };
 
         if (postBackData === this.informationHandler.seatingChart) {
-            message = this.informationHandler.seatingChartImageMessage();
-        }
+            return this.informationHandler.seatingChartImageMessage();
+        };
 
-        await this.userLineClient.replyMessage(replyToken, message);
-        return;
+        return undefined;
     }
 
 }

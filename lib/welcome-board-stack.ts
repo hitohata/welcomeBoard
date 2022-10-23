@@ -42,7 +42,7 @@ export class WelcomeBoardStack extends Stack {
         functionName: `welcomeMessageFunction${stageSuffix}`,
         entry: path.join(__dirname, "../lambda/main/src/main.ts"),
         handler: "lambdaHandler",
-        timeout: Duration.seconds(10),
+        timeout: Duration.seconds(30),
         environment: {
           CHANNEL_SECRET: channelSecret,
           CHANNEL_TOKEN: channelToken,
