@@ -119,7 +119,7 @@ export class Handler {
         let message: Message = {
             type: "text",
             text: "Not Found"
-        }
+        };
 
         if (postBackData === this.helpHandler.location) {
             message = await this.helpHandler.locationInformation();
@@ -130,12 +130,12 @@ export class Handler {
         };
 
         if (postBackData === this.profileHandler.groomProfile) {
-            message = await this.profileHandler.groomProfileMessage()
+            message = await this.profileHandler.getGroomProfileMessage();
         };
 
         if (postBackData === this.profileHandler.brideProfile) {
-            message = await this.profileHandler.brideProfileMessage();
-        }
+            message = await this.profileHandler.getBrideProfileMessage();
+        };
 
         await this.userLineClient.replyMessage(replyToken, message);
         return;

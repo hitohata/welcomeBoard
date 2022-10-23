@@ -3,8 +3,8 @@ import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
 export interface IProfileHandler {
   profileTemplate(): TemplateMessage
-  groomProfileMessage(): Promise<Message>
-  brideProfileMessage(): Promise<Message>
+  getGroomProfileMessage(): Promise<Message>
+  getBrideProfileMessage(): Promise<Message>
   groomProfile: string
   brideProfile: string
 }
@@ -41,12 +41,12 @@ export class ProfileHandler implements IProfileHandler {
           }
         ]
       }
-    } 
+    }
 
     return profileTemplate;
   };
 
-  public async groomProfileMessage(): Promise<Message> {
+  public async getGroomProfileMessage(): Promise<Message> {
     const groomProfile = await this.messageDb.getGroomProfile();
     return {
       type: "text",
@@ -54,7 +54,7 @@ export class ProfileHandler implements IProfileHandler {
     }
   }
 
-  public async brideProfileMessage(): Promise<Message> {
+  public async getBrideProfileMessage(): Promise<Message> {
     const brideProfile = await this.messageDb.getBrideProfile();
     return {
       type: "text",

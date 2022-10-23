@@ -5,6 +5,8 @@ import * as apiGateway from "aws-cdk-lib/aws-apigateway";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as path from "path";
 import * as nodeLambda from "aws-cdk-lib/aws-lambda-nodejs";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origin from "aws-cdk-lib/aws-cloudfront-origins"
 
 interface IProps extends StackProps {
   stageSuffix: string
@@ -27,6 +29,12 @@ export class WelcomeBoardStack extends Stack {
       bucketName: `wedding-image-bucket${stageSuffix}`,
     });
 
+    const distribution = new cloudfront.Distribution(this, "distribution", {
+      defaultBehavior: {
+        origin: new origin.S3Origin(imageContentsBucket)
+      }
+    })
+
     const messageFunction = new nodeLambda.NodejsFunction(
       this,
       "welcomeMessageFunction",
@@ -42,7 +50,8 @@ export class WelcomeBoardStack extends Stack {
           MANAGER_CHANNEL_TOKEN: managerChannelToken,
           TABLE_NAME: messageTable.tableName,
           REGION: this.region,
-          IMAGE_BUCKET_NAME: imageContentsBucket.bucketName
+          IMAGE_BUCKET_NAME: imageContentsBucket.bucketName,
+          DISTRIBUTION_ID: distribution.distributionDomainName
         }
       },
     );
