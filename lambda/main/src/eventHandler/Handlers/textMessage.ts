@@ -60,7 +60,7 @@ export class TextMessageHandler implements ITextMessageHandler {
                 }
                 default: {
                     message = "あー…"
-                }   
+                }
             }
         } else {
             switch (seed) {

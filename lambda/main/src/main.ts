@@ -21,7 +21,8 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
         hostClient,
         handlers.textMessageHandler,
         handlers.imageHandler,
-        handlers.informationHandler
+        handlers.informationHandler,
+        handlers.stickerHandler
     );
 
     const body: WebhookRequestBody = JSON.parse(event.body!);

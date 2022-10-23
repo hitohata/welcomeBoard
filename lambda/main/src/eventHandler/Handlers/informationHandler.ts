@@ -14,8 +14,8 @@ export interface IInformationHandler {
     seatingChartImageMessage(): ImageMessage
     locationInformation(): Promise<Message>,
     dateTimeInformation(): Promise<Message>,
-    getGroomProfileMessage(): Promise<Message>
-    getBrideProfileMessage(): Promise<Message>
+    getGroomProfileMessage(): Promise<Message[]>
+    getBrideProfileMessage(): Promise<Message[]>
 }
 
 export class InformationHandler implements IInformationHandler {
@@ -109,20 +109,41 @@ export class InformationHandler implements IInformationHandler {
         return dateTimeMessage;
     }
 
-    public async getGroomProfileMessage(): Promise<Message> {
-        const groomProfile = await this.messageDb.getGroomProfile();
-        return {
-        type: "text",
-        text: groomProfile.Profile
+    public async getGroomProfileMessage(): Promise<Message[]> {
+
+        const groomImages = this.distribution.getGroomImages();
+        const groomImageMessage: ImageMessage = {
+            type: "image",
+            originalContentUrl: groomImages[0],
+            previewImageUrl: groomImages[1]
         }
+
+        const groomProfile = await this.messageDb.getGroomProfile();
+        const groomProfileMessage: TextMessage = {
+            type: "text",
+            text: groomProfile.Profile
+        };
+
+        return [groomImageMessage, groomProfileMessage]
     }
 
-    public async getBrideProfileMessage(): Promise<Message> {
+    public async getBrideProfileMessage(): Promise<Message[]> {
+
+        const brideImage = this.distribution.getBrideImages();
+        const brideImageMessage: ImageMessage = {
+            type: "image",
+            originalContentUrl: brideImage[0],
+            previewImageUrl: brideImage[1]
+        };
+
         const brideProfile = await this.messageDb.getBrideProfile();
-        return {
-        type: "text",
-        text: brideProfile.Profile
-        }
+        const profileMessage: TextMessage = {
+            type: "text",
+            text: brideProfile.Profile
+        };
+
+
+        return [brideImageMessage, profileMessage];
     }
 };
 

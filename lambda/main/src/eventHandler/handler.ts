@@ -3,6 +3,7 @@ import { HostLineClient, UserLineClient } from "./lineClients";
 import { ITextMessageHandler } from "./Handlers/textMessage";
 import { ImageHandler } from "./Handlers/image";
 import { IInformationHandler } from "./Handlers/informationHandler";
+import { IStickerHandler } from "./Handlers/stickerHandler";
 
 export class Handler {
     private readonly userLineClient: UserLineClient;
@@ -10,22 +11,25 @@ export class Handler {
     private readonly textMessageHandler: ITextMessageHandler
     private readonly imageHandler: ImageHandler;
     private readonly informationHandler: IInformationHandler;
+    private readonly stickerHandler: IStickerHandler;
 
     constructor(
         userLineClient: UserLineClient,
         hostLineClient: HostLineClient,
         textMessageHandler: ITextMessageHandler,
         imageHandler: ImageHandler,
-        informationHandler: IInformationHandler
+        informationHandler: IInformationHandler,
+        stickerHandler: IStickerHandler
     ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
         this.textMessageHandler = textMessageHandler;
         this.imageHandler = imageHandler;
         this.informationHandler = informationHandler;
+        this.stickerHandler = stickerHandler;
     }
 
-    public async checkEvent(event: WebhookEvent) {
+    public async checkEvent(event: WebhookEvent): Promise<void> {
 
         if (event.type === "message") {
             if (event.message.type === "text") {
@@ -35,6 +39,13 @@ export class Handler {
 
             if (event.message.type === "image") {
                 await this.imageHandler.handleImage(event.message);
+                return;
+            }
+
+            // replay sticker
+            if (event.message.type === "sticker") {
+                const replyStickerMessage = this.stickerHandler.getNegativeStickerMessage();
+                await this.userLineClient.replyMessage(event.replyToken, replyStickerMessage)
                 return;
             }
         };
@@ -58,13 +69,12 @@ export class Handler {
             throw new Error("Not a text");
         }
 
-        const userInput = event.message.text;
-
         const [message, userName]= await Promise.all([
             this.textMessageHandler.messageHandler(event.message),
             this.userLineClient.getUserName(event)
         ]);
 
+        // get correct message
         if (message) {
 
             const correctMessage: TextMessage = {
@@ -81,9 +91,13 @@ export class Handler {
         }
 
         const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
+        const negativeSticker = this.stickerHandler.getNegativeStickerMessage()
 
         await Promise.all([
-            this.userLineClient.replyMessage(replayToken, incorrectMessage),
+            this.userLineClient.replyMessage(replayToken, [
+                negativeSticker,
+                incorrectMessage
+            ]),
             this.hostLineClient.broadcast({
                 type: "text",
                 text: `${userName} < ${event.message.text}`
@@ -91,12 +105,13 @@ export class Handler {
         ])
     }
 
+    // return information
     private async postbackEventHandling(event: PostbackEvent): Promise<void> {
         const replyToken = event.replyToken;
 
         const postBackData = event.postback.data;
 
-        let message: Message = {
+        let message: Message | Message[] = {
             type: "text",
             text: "Not Found"
         };
