@@ -15,3 +15,5 @@ cdk.out
 
 *.sh
 *.ps1
+
+tools/lineRichMenu/src/rich-back.jpg

@@ -14,7 +14,7 @@ const main = async () => {
             richMenuObjectA()
         )
 
-        const filepathA = join(__dirname, './richmenu-template-guide-01.png')
+        const filepathA = join(__dirname, "./rich-back.jpg") // use appropriate dir
         const bufferA = readFileSync(filepathA)
 
         await lineClient.setRichMenuImage(richMenuAId, bufferA);
