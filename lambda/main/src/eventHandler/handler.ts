@@ -76,6 +76,7 @@ export class Handler {
             const message = await this.postbackEventHandling(event);
             if (message) {
                 await this.userLineClient.replyMessage(replayToken, message)
+                return;
             }
         };
 

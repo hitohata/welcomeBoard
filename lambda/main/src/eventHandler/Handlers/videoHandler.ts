@@ -19,8 +19,6 @@ export class VideoHandler implements IVideoHandler {
     public async handleVideo(videoEvent: VideoEventMessage): Promise<void> {
         const videoId = videoEvent.id;
 
-        console.log(videoId);
-
         const contentStream = await this.lineClient.getMessageContent(videoId);
 
         await this.s3Client.putVideo(videoId, contentStream);
