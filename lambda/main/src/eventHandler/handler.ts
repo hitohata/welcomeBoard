@@ -72,7 +72,7 @@ export class Handler {
             if (event.message.type === "image" && event.source.userId) {
 
                 // this is for the beta
-                const userName = this.userLineClient.getUserName(event);
+                const userName = await this.userLineClient.getUserName(event);
                 await Promise.all([
                     this.userLineClient.replyMessage(replayToken, {
                         type: "text",
@@ -93,7 +93,7 @@ export class Handler {
 
             if (event.message.type === "video" && event.message.contentProvider.type === "line" && event.source.userId) {
 
-                const userName = this.userLineClient.getUserName(event);
+                const userName = await this.userLineClient.getUserName(event);
 
                 // this is for the beta test.
                 await Promise.all([
@@ -114,7 +114,7 @@ export class Handler {
 
             // replay sticker
             if (event.message.type === "sticker") {
-                const replyStickerMessage = this.stickerHandler.getPositiveStickerMessage();
+                const replyStickerMessage = await this.stickerHandler.getPositiveStickerMessage();
 
                 await this.userLineClient.replyMessage(event.replyToken, replyStickerMessage)
                 return;
@@ -130,18 +130,16 @@ export class Handler {
             }
         };
 
-        if (event.type === "memberJoined") {
-            const userNames = await Promise.all(
-                event.joined.members.map((async (el) => {
-                    const userProfile = await this.userLineClient.getProfile(el.userId);
-                    return userProfile.displayName;
-                }))
-            )
+        if (event.type === "follow") {
+
+            const userName = await this.userLineClient.getUserName(event)
 
             await this.hostLineClient.broadcast({
                 type: "text",
-                text: userNames.join(",")
-            })
+                text: `${userName} has joined to the wedding line channel.`
+            });
+
+            return;
         }
 
         console.error(event);
