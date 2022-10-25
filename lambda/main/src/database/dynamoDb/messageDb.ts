@@ -113,12 +113,8 @@ export class MessageDb implements IMessageDb {
             }
         };
 
-        console.log(param);
-
         const getCommand = new GetItemCommand(param);
         const brideProfile = await this.client.send(getCommand);
-
-        console.log(brideProfile);
 
         if (!brideProfile.Item) {
             throw new Error("Bride profile is not found.");

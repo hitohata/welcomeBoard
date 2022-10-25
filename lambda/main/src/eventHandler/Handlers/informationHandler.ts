@@ -180,6 +180,5 @@ const timeDiff = (weddingDateTime: Date, now: Date): string => {
 }
 
 const toDateTimeString = (dateTime: Date): string => {
-    console.log(dateTime);
     return `${dateTime.getFullYear()}/${dateTime.getMonth() + 1}/${dateTime.getDate()} ${String(dateTime.getHours()).padStart(2, "0")}:${String(dateTime.getMinutes()).padStart(2, "0")}:${String(dateTime.getSeconds()).padStart(2, "0")}`
 }
