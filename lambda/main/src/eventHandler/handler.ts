@@ -5,7 +5,6 @@ import { ImageHandler } from "./Handlers/image";
 import { IInformationHandler } from "./Handlers/informationHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
 import { IVideoHandler } from "./Handlers/videoHandler";
-import { env } from "process";
 
 interface IReplayMessage {
     userReplay: Message | Message[],
@@ -53,13 +52,14 @@ export class Handler {
                 ])}
             };
 
-            if (event.message.type === "image") {
-                await this.imageHandler.handleImage(event.message);
+            if (event.message.type === "image" && event.source.userId) {
+                const userId = event.source.userId;
+                await this.imageHandler.handleImage(event.message, userId);
                 return;
             };
 
-            if (event.message.type === "video" && event.message.contentProvider.type === "line") {
-                await this.videoHandler.handleVideo(event.message);
+            if (event.message.type === "video" && event.message.contentProvider.type === "line" && event.source.userId) {
+                await this.videoHandler.handleVideo(event.message, event.source.userId);
                 return;
             }
 

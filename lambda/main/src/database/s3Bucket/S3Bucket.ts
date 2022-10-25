@@ -18,7 +18,7 @@ export class S3ImageBucket implements IS3Bucket {
             client: this.client,
             params: {
                 Bucket: this.bucketName,
-                Key: `upload-image/${fileName}.jpeg`,
+                Key: `user-upload/image/${fileName}.jpeg`,
                 Body: image
             }
         })
@@ -33,7 +33,7 @@ export class S3ImageBucket implements IS3Bucket {
             client: this.client,
             params: {
                 Bucket: this.bucketName,
-                Key: `upload-video/${fileName}.mp4`,
+                Key: `user-upload/video/${fileName}.mp4`,
                 Body: video
             }
         })
