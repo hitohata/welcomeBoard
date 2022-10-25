@@ -5,6 +5,7 @@ import { ImageHandler } from "./Handlers/image";
 import { IInformationHandler } from "./Handlers/informationHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
 import { IVideoHandler } from "./Handlers/videoHandler";
+import { env } from "process";
 
 interface IReplayMessage {
     userReplay: Message | Message[],
@@ -79,6 +80,20 @@ export class Handler {
                 return;
             }
         };
+
+        if (event.type === "memberJoined") {
+            const userNames = await Promise.all(
+                event.joined.members.map((async (el) => {
+                    const userProfile = await this.userLineClient.getProfile(el.userId);
+                    return userProfile.displayName;
+                }))
+            )
+
+            await this.hostLineClient.broadcast({
+                type: "text",
+                text: userNames.join(",")
+            })
+        }
 
         console.error(event);
 
