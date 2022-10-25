@@ -11,7 +11,7 @@ export interface IInformationHandler {
     groomProfile: string,
     brideProfile: string,
     menuImageMessage(): ImageMessage,
-    seatingChartImageMessage(): ImageMessage
+    seatingChartImageMessage(): ImageMessage | Message
     locationInformation(): Promise<Message>,
     dateTimeInformation(): Promise<Message>,
     getGroomProfileMessage(): Promise<Message[]>
@@ -67,8 +67,13 @@ export class InformationHandler implements IInformationHandler {
         };
     };
 
-    public seatingChartImageMessage(): ImageMessage {
+    public seatingChartImageMessage(): ImageMessage | Message {
         const seatingChartImageUrl = this.distribution.getSeatingChartUrl();
+
+        return {
+            type: "text",
+            text: "きまってないんですよー"
+        }
 
         return {
             type: "image",
@@ -139,7 +144,7 @@ export class InformationHandler implements IInformationHandler {
         const brideProfile = await this.messageDb.getBrideProfile();
         const profileMessage: TextMessage = {
             type: "text",
-            text: brideProfile.Profile
+            text: "まだかいてないんですよー"
         };
 
 
@@ -149,13 +154,13 @@ export class InformationHandler implements IInformationHandler {
 
 const weddingDateDetail = (weddingDateTime: Date): string => {
 
-    const receptionDateTime = `Reception: ${toDateTimeString(weddingDateTime)}`; 
+    const receptionDateTime = `受付: ${toDateTimeString(weddingDateTime)}`; 
 
     const weddingCeremonyDate = new Date(weddingDateTime.setTime(weddingDateTime.getTime() + (30 * 60 * 1000)));
-    const weddingCeremony = `Wedding Ceremony: ${toDateTimeString(weddingCeremonyDate)}`;
+    const weddingCeremony = `挙式: ${toDateTimeString(weddingCeremonyDate)}`;
 
     const weddingBanquetDateTime = new Date(weddingCeremonyDate.setTime(weddingCeremonyDate.getTime() + (40 * 60 * 1000)))
-    const weddingBanquet = `Wedding Banquet: ${toDateTimeString(weddingBanquetDateTime)}`
+    const weddingBanquet = `披露宴: ${toDateTimeString(weddingBanquetDateTime)}`
 
     return [receptionDateTime, weddingCeremony, weddingBanquet].join("\n");
 }

@@ -44,6 +44,23 @@ export class Handler {
             const replayToken = event.replyToken;
 
             if (event.message.type === "text") {
+
+                const userName = await this.userLineClient.getUserName(event);
+
+                //this is test
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, {
+                        type: "text",
+                        text: "まだ受け付けてないんですよー。すいませーん。"
+                    }),
+                    this.hostLineClient.broadcast({
+                        type: "text",
+                        text: `${userName} < ${event.message.text}`
+                    })
+                ])
+
+                return;
+
                 const message = await this.textMessageHandling(event);
                 if (message) {
                 await Promise.all([
@@ -53,12 +70,44 @@ export class Handler {
             };
 
             if (event.message.type === "image" && event.source.userId) {
+
+                // this is for the beta
+                const userName = this.userLineClient.getUserName(event);
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, {
+                        type: "text",
+                        text: "画像も付けてないんですよー。すいませーん。"
+                    }),
+                    this.hostLineClient.broadcast({
+                        type: "text",
+                        text: `${userName} has uploaded an image(s). ID: ${event.message.id}`
+                    })
+                ]);
+
+                return;
+
                 const userId = event.source.userId;
                 await this.imageHandler.handleImage(event.message, userId);
                 return;
             };
 
             if (event.message.type === "video" && event.message.contentProvider.type === "line" && event.source.userId) {
+
+                const userName = this.userLineClient.getUserName(event);
+
+                // this is for the beta test.
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, {
+                        type: "text",
+                        text: "動画はなおさらですー。すいませーん。"
+                    }),
+                    this.hostLineClient.broadcast({
+                        type: "text",
+                        text: `${userName} has uploaded a video(s). ID: ${event.message.id}`
+                    })
+                ]);
+                return;
+
                 await this.videoHandler.handleVideo(event.message, event.source.userId);
                 return;
             }
