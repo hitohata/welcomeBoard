@@ -25,6 +25,9 @@
   },
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "manager-console",
+    "lambda",
+    "tools"
   ]
 }

@@ -1,0 +1,21 @@
+type Message {
+    Keyword: ID!
+    Kind: String
+    Name: String
+    Message: String
+}
+type Query {
+    getMessage(Keyword: ID!): Message
+    listMessages: [Message!]
+}
+input MessageInput {
+    Keyword: ID!
+    Kind: String,
+    Name: String
+    Message: String
+}
+
+type Mutation {
+    addMessage(input: MessageInput!): Message
+    deleteMessage(Keyword: ID!): Message
+}

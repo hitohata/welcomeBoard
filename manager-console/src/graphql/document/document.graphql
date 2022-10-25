@@ -1,0 +1,30 @@
+query getMessage($keyword: ID = "") {
+  getMessage(Keyword: $keyword) {
+    Keyword
+    Message
+    Name
+  }
+}
+
+query ListMessages {
+  listMessages {
+    Keyword
+    Name
+  }
+}
+
+mutation AddMessage($keyword: ID = "", $message: String = null, $name: String = null) {
+  addMessage(input: {Name: $name, Message: $message, Keyword: $keyword}) {
+    Keyword
+    Message
+    Name
+  }
+}
+
+mutation DeleteMessage($keyword: ID! = "") {
+  deleteMessage(Keyword: $keyword) {
+    Keyword
+    Message
+    Name
+  }
+}
