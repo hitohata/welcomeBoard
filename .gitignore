@@ -6,3 +6,14 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+
+.devcontainer
+.vscode
+.env
+
+!manager-console/src/react-app-env.d.ts
+
+*.sh
+*.ps1
+
+tools/lineRichMenu/src/rich-back.jpg
