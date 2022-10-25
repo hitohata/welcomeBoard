@@ -8,7 +8,7 @@ import { IVideoHandler } from "./Handlers/videoHandler";
 
 interface IReplayMessage {
     userReplay: Message | Message[],
-    hostBroadcast: Message | Message[] 
+    hostBroadcast: Message | Message[]
 }
 
 export class Handler {
@@ -84,7 +84,7 @@ export class Handler {
 
         this.hostLineClient.broadcast({
             type: "text",
-            text: event.toString()
+            text: JSON.stringify(event.toString())
         })
 
         return;

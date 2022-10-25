@@ -4,7 +4,6 @@ import { HostLineClient, UserLineClient } from "eventHandler/lineClients";
 import { Handler } from "eventHandler/handler";
 import { handlersFactory } from "eventHandler/Handlers/handlers";
 import { MessageDb } from "database/dynamoDb/messageDb";
-import { VideoHandler } from "eventHandler/Handlers/videoHandler";
 
 export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
@@ -32,6 +31,13 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
     try {
         await Promise.all(body.events.map(el => handler.checkEvent(el)));
     } catch (error) {
+
+        if (body.events[0].type === "message" && body.events[0].replyToken) {
+            return lineClient.replyMessage(body.events[0].replyToken, {
+                type: "text",
+                text: "Error"
+            });
+        }
 
         console.error(error);
 

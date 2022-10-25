@@ -114,8 +114,8 @@ export class InformationHandler implements IInformationHandler {
         const groomImages = this.distribution.getGroomImages();
         const groomImageMessage: ImageMessage = {
             type: "image",
-            originalContentUrl: groomImages[0],
-            previewImageUrl: groomImages[1]
+            originalContentUrl: groomImages.mainImageUrl,
+            previewImageUrl: groomImages.thumbnailImageUrl
         }
 
         const groomProfile = await this.messageDb.getGroomProfile();
@@ -132,8 +132,8 @@ export class InformationHandler implements IInformationHandler {
         const brideImage = this.distribution.getBrideImages();
         const brideImageMessage: ImageMessage = {
             type: "image",
-            originalContentUrl: brideImage[0],
-            previewImageUrl: brideImage[1]
+            originalContentUrl: brideImage.mainImageUrl,
+            previewImageUrl: brideImage.thumbnailImageUrl
         };
 
         const brideProfile = await this.messageDb.getBrideProfile();

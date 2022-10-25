@@ -1,4 +1,5 @@
-import { IDistribution } from "./IDistribution";
+import { IProfile } from "database/dynamoDb/IMessageDb";
+import { IDistribution, IProfileImageUrl } from "./IDistribution";
 
 export class Distribution implements IDistribution {
 
@@ -20,21 +21,21 @@ export class Distribution implements IDistribution {
      * return groom's image and its thumbnail.
      * @returns [image url, thumbnail url]
      */
-    public getGroomImages(): [string, string] {
-       return [
-            `${this.distribution}/information-folder/profiles/groom-content.jpg`,
-            `${this.distribution}/information-folder/profiles/groom-preview.jpg`
-       ]
+    public getGroomImages(): IProfileImageUrl {
+       return {
+            mainImageUrl: `${this.distribution}/information-folder/profiles/groom-content.jpg`,
+            thumbnailImageUrl: `${this.distribution}/information-folder/profiles/groom-preview.jpg`
+       }
     };
 
     /**
      * same as above
      * @returns [image url, thumbnail url]
      */
-    public getBrideImages(): [string, string] {
-       return [
-            `${this.distribution}/information-folder/profiles/bride-content.jpg`,
-            `${this.distribution}/information-folder/profiles/bride-preview.jpg`
-       ]
+    public getBrideImages(): IProfileImageUrl {
+       return {
+            mainImageUrl: `${this.distribution}/information-folder/profiles/bride-content.jpg`,
+            thumbnailImageUrl: `${this.distribution}/information-folder/profiles/bride-preview.jpg`
+       }
     };
 }
