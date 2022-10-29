@@ -13,10 +13,11 @@ export const ModeWrapper: React.FC<IProps> = (props) => {
 
     const { mode, handleSetMode, children } = props;
 
-    const modeList: Mode[] = Object.entries(Mode).map(([_, value]) => value);
+    const modeList: Mode[] = Object.entries(Mode).map(([_, value]) => value).filter(modeElement => modeElement !== Mode.TOP_MODE);
 
     return (
         <>
+            <Button>Top</Button>
             <Box sx={{ marginBottom: 5 }}>
                 { modeList.map(el => el !== mode &&
                     <Button

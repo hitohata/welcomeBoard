@@ -1,21 +1,48 @@
 type Message {
     Keyword: ID!
-    Kind: String
-    Name: String
-    Message: String
-}
-type Query {
-    getMessage(Keyword: ID!): Message
-    listMessages: [Message!]
-}
-input MessageInput {
-    Keyword: ID!
-    Kind: String,
+    Kind: ID!
     Name: String
     Message: String
 }
 
+type ActiveUser {
+    Keyword: ID!
+    Kind: ID!
+    ActiveUsers: [String!]
+}
+
+type EasterEgg {
+    Keyword: ID!
+    Kind: ID!
+    TargetUsers: [String!]
+    Message: String
+}
+
+type Query {
+    getMessage(Keyword: ID!, Kind: ID!): Message
+    listMessages: [Message!]
+    getActiveUsers(Keyword: ID!, Kind: ID!): ActiveUser
+    listEasterEggs: [EasterEgg]
+    getEasterEgg(Keyword: ID!, Kind: ID!): EasterEgg
+}
+
+input MessageInput {
+    Keyword: ID!
+    Kind: ID!
+    Name: String!
+    Message: String!
+}
+
+input EasterEggInput {
+    Keyword: ID!
+    Kind: ID!
+    TargetUsers: [String!]
+    Message: String!
+}
+
 type Mutation {
     addMessage(input: MessageInput!): Message
+    addEasterEgg(input: EasterEggInput!): EasterEgg
     deleteMessage(Keyword: ID!): Message
+    deleteEasterEgg(Keyword: ID!): EasterEgg
 }

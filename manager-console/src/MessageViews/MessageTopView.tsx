@@ -1,13 +1,15 @@
 import { useState } from "react"
 import { Button, Grid } from "@mui/material";
-import { CreateMessage } from "./CreateMessage/CreateMessage";
-import { ListMessages } from "./ListMessages/ListMessages"
+import { CreateMessage } from "./Message/CreateMessage/CreateMessage";
+import { ListMessages } from "./Message/ListMessages/ListMessages"
 import { ModeWrapper } from "./Wrapper/ModeWrapper";
 
 export enum Mode {
-    CREATE_MODE = "CreateMode",
-    LIST_MODE = "ListMode",
-    TOP_MODE = "TopMode"
+    CREATE_MESSAGE_MODE = "CreateMessageMode",
+    CREATE_EASTER_EGG_MODE = "CreateEasterEggMode",
+    LIST_MESSAGE_MODE = "ListMessageMode",
+    LIST_EASTER_EGG_MODE = "ListEasterEggMode",
+    TOP_MODE = "TopMode",
 }
 
 export const MessageTopView: React.FC = () => {
@@ -18,7 +20,7 @@ export const MessageTopView: React.FC = () => {
         setMode(mode);
     };
 
-    if (mode === Mode.CREATE_MODE) {
+    if (mode === Mode.CREATE_MESSAGE_MODE) {
         return (
             <ModeWrapper mode={mode} handleSetMode={handleSetMode}>
                 <CreateMessage />
@@ -26,7 +28,7 @@ export const MessageTopView: React.FC = () => {
         );
     }
 
-    if (mode === Mode.LIST_MODE) {
+    if (mode === Mode.LIST_MESSAGE_MODE) {
         return (
             <ModeWrapper mode={mode} handleSetMode={handleSetMode}>
                 <ListMessages />
@@ -54,12 +56,12 @@ const SelectMode: React.FC<ISelectMode> = (props) => {
     return (
         <Grid container={ true } spacing={ 3 }>
             <Grid item={ true } xs={ 12 }>
-                <Button onClick={ () => handleSetMode(Mode.LIST_MODE) } >
+                <Button onClick={ () => handleSetMode(Mode.LIST_MESSAGE_MODE) } >
                     Message List
                 </Button>
             </Grid>
             <Grid item={ true } xs={ 12 }>
-                <Button onClick={ () => handleSetMode(Mode.CREATE_MODE)} >
+                <Button onClick={ () => handleSetMode(Mode.CREATE_MESSAGE_MODE)} >
                     Create A New Message
                 </Button>
             </Grid>

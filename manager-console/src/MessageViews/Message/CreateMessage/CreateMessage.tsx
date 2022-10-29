@@ -1,6 +1,6 @@
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { MessageInput, useAddMessageMutation, useGetMessageLazyQuery } from "../../graphql/generated"
+import { AddMessageMutationVariables, MessageInput, useAddMessageMutation, useGetMessageLazyQuery } from "../../../graphql/generated"
 import { LoadingHearts } from "utils/Loading";
 
 interface IProps {
@@ -14,12 +14,12 @@ export const CreateMessage:React.FC<IProps> = (props) => {
     const [getMessage, getMessageState] = useGetMessageLazyQuery();
     const [addMessage, addMessageState]= useAddMessageMutation()
 
-    const [message, setMessage] = useState<MessageInput>({Keyword:""})
+    const [message, setMessage] = useState<AddMessageMutationVariables>({Keyword:"", Name: "", Message: ""})
 
     useEffect(() => {
         if (keyword) {
             getMessage({
-                variables: { keyword: keyword },
+                variables: { Keyword: keyword },
                 fetchPolicy: "no-cache"
             });
         };
@@ -36,12 +36,11 @@ export const CreateMessage:React.FC<IProps> = (props) => {
     }, [getMessageState.data])
 
     const handlePost = () => {
-        console.log("post")
         addMessage({
             variables: {
-                keyword: message.Keyword,
-                name: message.Name,
-                message: message.Message,
+                Keyword: message.Keyword,
+                Name: message.Name,
+                Message: message.Message,
             },
         })
     }
