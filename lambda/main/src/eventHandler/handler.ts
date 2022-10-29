@@ -5,6 +5,7 @@ import { ImageHandler } from "./Handlers/image";
 import { IInformationHandler } from "./Handlers/informationHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
 import { IVideoHandler } from "./Handlers/videoHandler";
+import { IFollowHandler } from "./Handlers/followHandler";
 
 interface IReplayMessage {
     userReplay: Message | Message[],
@@ -19,6 +20,7 @@ export class Handler {
     private readonly videoHandler: IVideoHandler;
     private readonly informationHandler: IInformationHandler;
     private readonly stickerHandler: IStickerHandler;
+    private readonly followEventHandler: IFollowHandler
 
     constructor(
         userLineClient: UserLineClient,
@@ -27,7 +29,8 @@ export class Handler {
         imageHandler: ImageHandler,
         videoHandler: IVideoHandler,
         informationHandler: IInformationHandler,
-        stickerHandler: IStickerHandler
+        stickerHandler: IStickerHandler,
+        followEventHandler: IFollowHandler
     ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
@@ -36,6 +39,7 @@ export class Handler {
         this.videoHandler = videoHandler;
         this.informationHandler = informationHandler;
         this.stickerHandler = stickerHandler;
+        this.followEventHandler = followEventHandler;
     }
 
     public async checkEvent(event: WebhookEvent): Promise<void> {
@@ -45,28 +49,14 @@ export class Handler {
 
             if (event.message.type === "text") {
 
-                const userName = await this.userLineClient.getUserName(event);
-
-                //this is test
-                await Promise.all([
-                    this.userLineClient.replyMessage(replayToken, {
-                        type: "text",
-                        text: "まだ受け付けてないんですよー。すいませーん。"
-                    }),
-                    this.hostLineClient.broadcast({
-                        type: "text",
-                        text: `${userName} < ${event.message.text}`
-                    })
-                ])
-
-                return;
-
                 const message = await this.textMessageHandling(event);
+
                 if (message) {
-                await Promise.all([
-                    this.userLineClient.replyMessage(replayToken, message.userReplay),
-                    this.hostLineClient.broadcast(message.hostBroadcast)
-                ])}
+                    await Promise.all([
+                        this.userLineClient.replyMessage(replayToken, message.userReplay),
+                        this.hostLineClient.broadcast(message.hostBroadcast)
+                    ])
+                }
             };
 
             if (event.message.type === "image" && event.source.userId) {
@@ -132,12 +122,9 @@ export class Handler {
 
         if (event.type === "follow") {
 
-            const userName = await this.userLineClient.getUserName(event)
+            const followNotificationMessage = await this.followEventHandler.handleFollowEvent(event)
 
-            await this.hostLineClient.broadcast({
-                type: "text",
-                text: `${userName} has joined to the wedding line channel.`
-            });
+            await this.hostLineClient.broadcast(followNotificationMessage);
 
             return;
         }
@@ -163,12 +150,42 @@ export class Handler {
             throw new Error("Not a text");
         }
 
-        const [message, userName]= await Promise.all([
-            this.textMessageHandler.messageHandler(event.message),
-            this.userLineClient.getUserName(event)
+        const userName = await this.userLineClient.getUserName(event);
+
+        const [
+            // message,
+            easterEggMessage
+        ] = await Promise.all([
+            // this.textMessageHandler.messageHandler(event.message),
+            this.textMessageHandler.easterEggMessageHandler(event.message, userName)
         ]);
 
+        if (easterEggMessage) {
+            const easterToHost: TextMessage = {
+                type: "text",
+                text: `${userName} gets a easter egg message.`
+            }
+
+            return {
+                userReplay: easterEggMessage,
+                hostBroadcast: easterToHost
+            }
+        }
+
+        //this is test
+        return {
+            userReplay: {
+                type: "text",
+                text: "まだ受け付けてないんですよー。すいませーん。"
+            },
+            hostBroadcast: {
+                type: "text",
+                text: `${userName} < ${event.message.text}`
+            }
+        }
+
         // get correct message
+        /*
         if (message) {
 
             const correctMessage: TextMessage = {
@@ -181,6 +198,7 @@ export class Handler {
                 hostBroadcast: correctMessage
             }
         }
+        */
 
         const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
         const negativeSticker = this.stickerHandler.getNegativeStickerMessage()

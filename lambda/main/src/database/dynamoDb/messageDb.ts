@@ -1,6 +1,6 @@
-import { DynamoDBClient, GetItemCommand, GetItemCommandInput } from "@aws-sdk/client-dynamodb";
-import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
-import { IDateTime, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
+import { DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { IDateTime, IEasterEgg, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -8,11 +8,59 @@ export class MessageDb implements IMessageDb {
 
     private readonly kindInformation = "Information";
     private readonly kindMessage = "Message";
+    private readonly easterEgg = "EasterEgg";
+    private readonly systemInformation = "SystemInformation"
 
     constructor(){
         this.client = new DynamoDBClient({ region: process.env.REGION });
         this.tableName = process.env.TABLE_NAME!;
     };
+
+    /**
+     * putUserName
+     */
+    public async putActiveUserName(userNames: string[]): Promise<void> {
+        const pkName = "ActiveUsers";
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": pkName },
+                "Kind": { "S": this.systemInformation },
+                "ActiveUsers": { "L": userNames.map(user => ({ "S": user })) }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+
+    }
+
+    public async getActiveUserNames(): Promise<string[]> {
+        const pkName = "ActiveUsers";
+
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": pkName },
+                "Kind": { "S": this.systemInformation }
+            }
+        }
+
+        const getItemCommand = new GetItemCommand(param)
+
+        const getResult = await this.client.send(getItemCommand);
+
+        if (!getResult.Item) {
+            return []
+        };
+
+        const item = unmarshall(getResult.Item);
+
+        return item.ActiveUsers
+
+    }
 
     public async getLocation(): Promise<ILocationInfo> {
 
@@ -103,6 +151,33 @@ export class MessageDb implements IMessageDb {
 
         return message;
     };
+
+    public async getEasterEgg(keyword: string): Promise<IEasterEgg | undefined> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": keyword },
+                "Kind": { "S": this.easterEgg }
+            }
+        };
+
+        const getItemCommand = new GetItemCommand(param);
+        const dynamoOutput = await this.client.send(getItemCommand);
+
+        if (!dynamoOutput.Item) {
+            return undefined;
+        };
+
+        const item = unmarshall(dynamoOutput.Item);
+
+        const message: IEasterEgg = {
+            Keyword: item.Keyword,
+            TargetUsers: item.TargetUsers,
+            Message: item.Message
+        };
+
+        return message;
+    }
 
     public async getBrideProfile(): Promise<IProfile> {
         const param: GetItemCommandInput = {
