@@ -3,6 +3,7 @@ import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
 export interface ITextMessageHandler {
     messageHandler(textMessageEvent: TextEventMessage): Promise<Message | undefined>
+    easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined>
     incorrectMessageHandler(textMessageEvent: TextEventMessage): Message
 }
 
@@ -20,7 +21,7 @@ export class TextMessageHandler implements ITextMessageHandler {
 
         const userInput = textMessageEvent.text;
 
-        const messageData = await this.messageDbClient.getMessage(userInput); 
+        const messageData = await this.messageDbClient.getMessage(userInput);
 
         if (!messageData) {
             return undefined;
@@ -30,6 +31,33 @@ export class TextMessageHandler implements ITextMessageHandler {
             type: "text",
             text: `${messageData.Name}\n${messageData.Message}`
         }
+    }
+
+    public async easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined> {
+        const userInput = textMessageEvent.text;
+
+        const messageData = await this.messageDbClient.getEasterEgg(userInput);
+
+        if (!messageData) {
+            return undefined;
+        };
+
+        if (messageData.TargetUsers.length === 0) {
+            return {
+                type: "text",
+                text: messageData.Message
+            }
+        }
+
+        if (messageData.TargetUsers.some(user => user === userName)) {
+            return {
+                type: "text",
+                text: messageData.Message
+            }
+        };
+
+        return undefined;
+
     }
 
     public incorrectMessageHandler(textMessageEvent: TextEventMessage): Message {

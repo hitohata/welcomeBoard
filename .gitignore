@@ -10,6 +10,8 @@ cdk.out
 .devcontainer
 .vscode
 .env
+.env.prod
+.env.dev
 
 !manager-console/src/react-app-env.d.ts
 

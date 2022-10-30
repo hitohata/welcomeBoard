@@ -7,12 +7,13 @@ import { MessageDb } from "database/dynamoDb/messageDb";
 
 export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
+    console.log(event);
+
     const lineSignature: string = event.headers['x-line-signature']!;
 
     const lineClient = new UserLineClient(lineSignature, event.body);
 
     const hostClient = new HostLineClient();
-
 
     const handlers = handlersFactory(new MessageDb(), lineClient);
 
@@ -23,7 +24,8 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
         handlers.imageHandler,
         handlers.videoHandler,
         handlers.informationHandler,
-        handlers.stickerHandler
+        handlers.stickerHandler,
+        handlers.followEventHandler
     );
 
     const body: WebhookRequestBody = JSON.parse(event.body!);

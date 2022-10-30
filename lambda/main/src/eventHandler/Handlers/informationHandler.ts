@@ -144,9 +144,8 @@ export class InformationHandler implements IInformationHandler {
         const brideProfile = await this.messageDb.getBrideProfile();
         const profileMessage: TextMessage = {
             type: "text",
-            text: "まだかいてないんですよー"
+            text: brideProfile.Profile
         };
-
 
         return [brideImageMessage, profileMessage];
     }

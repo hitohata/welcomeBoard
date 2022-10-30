@@ -1,8 +1,10 @@
-import { RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
+import { Duration, RemovalPolicy, Resource, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as nodeLambda from "aws-cdk-lib/aws-lambda-nodejs";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 
 interface IProps extends StackProps {
@@ -43,6 +45,18 @@ export class WelcomeBoardManagerStack extends Stack {
             },
         });
 
+        welcomeMessageTable.addGlobalSecondaryIndex({
+            indexName: "KindIndex",
+            partitionKey: {
+                name: "Kind",
+                type: dynamodb.AttributeType.STRING
+            },
+            sortKey: {
+                name: "Keyword",
+                type: dynamodb.AttributeType.STRING
+            }
+        })
+
         this.welcomeMessageTableArn = welcomeMessageTable.tableArn;
 
         this.appSyncSetting(welcomeMessageTable.tableArn);
@@ -50,6 +64,7 @@ export class WelcomeBoardManagerStack extends Stack {
     }
 
     private appSyncSetting(tableArn: string) {
+
         const userPool = new cognito.UserPool(this, "welcomeMessageManagementUser", {
             userPoolName: `WelcomeMessageManagementUsers${this.deployStageSuffix}`,
             removalPolicy: RemovalPolicy.DESTROY
@@ -71,21 +86,60 @@ export class WelcomeBoardManagerStack extends Stack {
 
         const welcomeMessageTable = dynamodb.Table.fromTableArn(this, "messageTable", tableArn);
 
+        const resolverFunction = new nodeLambda.NodejsFunction(this, "ResolverFunction", {
+            functionName: `messageDbResolverFunction${this.deployStageSuffix}`,
+            entry: path.join(__dirname, "../lambda/resolverFunction/src/index.ts"),
+            handler: "lambdaHandler",
+            timeout: Duration.seconds(10),
+            environment: {
+                REGION: this.region,
+                TABLE_NAME: welcomeMessageTable.tableName
+            }
+        })
+
+        resolverFunction.role?.addToPrincipalPolicy(new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["dynamodb:*"],
+            resources: [
+                `${welcomeMessageTable.tableArn}/*`
+            ]
+        }))
+
+        welcomeMessageTable.grantFullAccess(resolverFunction);
+
         const dynamoDS = appSyncApi.addDynamoDbDataSource("dynamoDS", welcomeMessageTable);
+        const lambdaDs = appSyncApi.addLambdaDataSource("lambdaResolver", resolverFunction);
 
         dynamoDS.createResolver({
             typeName: "Query",
             fieldName: "getMessage",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbGetItem("Keyword", "Keyword"),
+            requestMappingTemplate: this.getDynamoResolver("Keyword", "Kind"),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
         });
 
         dynamoDS.createResolver({
             typeName: "Query",
-            fieldName: "listMessages",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
-            responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList()
+            fieldName: "getActiveUsers",
+            requestMappingTemplate: this.getDynamoResolver("Keyword", "Kind"),
+            responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
         });
+
+        dynamoDS.createResolver({
+            typeName: "Query",
+            fieldName: "getEasterEgg",
+            requestMappingTemplate: this.getDynamoResolver("Keyword", "Kind"),
+            responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
+        });
+
+        lambdaDs.createResolver({
+            typeName: "Query",
+            fieldName: "listMessages",
+        });
+
+        lambdaDs.createResolver({
+            typeName: "Query",
+            fieldName: "listEasterEggs"
+        })
 
         dynamoDS.createResolver({
             typeName: "Mutation",
@@ -99,13 +153,43 @@ export class WelcomeBoardManagerStack extends Stack {
 
         dynamoDS.createResolver({
             typeName: "Mutation",
-            fieldName: "deleteMessage",
-            requestMappingTemplate: appsync.MappingTemplate.dynamoDbDeleteItem("Keyword", "Keyword"),
+            fieldName: "addEasterEgg",
+            requestMappingTemplate: appsync.MappingTemplate.dynamoDbPutItem(
+                appsync.PrimaryKey.partition("Keyword").is("input.Keyword"),
+                appsync.Values.projecting("input")
+            ),
             responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem()
+        });
+
+        lambdaDs.createResolver({
+            typeName: "Mutation",
+            fieldName: "deleteMessage",
+        });
+
+        lambdaDs.createResolver({
+            typeName: "Mutation",
+            fieldName: "deleteEasterEgg",
         });
     }
 
     public tableArn(): string {
         return this.welcomeMessageTableArn;
     }
+
+    private getDynamoResolver(partitionKey: string, sortKey: string): appsync.MappingTemplate {
+			return appsync.MappingTemplate.fromString(
+				`{
+                "version": "2017-02-28",
+                "operation": "GetItem",
+                "key": {
+                  "${partitionKey}": $util.dynamodb.toDynamoDBJson(
+                    $ctx.args.${partitionKey}
+                  ),
+                  "${sortKey}": $util.dynamodb.toDynamoDBJson(
+                    $ctx.args.${sortKey}
+                  )
+                }
+            }`,
+		);
+	};
 }
