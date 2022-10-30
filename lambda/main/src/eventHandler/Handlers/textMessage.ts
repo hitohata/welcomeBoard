@@ -42,6 +42,13 @@ export class TextMessageHandler implements ITextMessageHandler {
             return undefined;
         };
 
+        if (messageData.TargetUsers.length === 0) {
+            return {
+                type: "text",
+                text: messageData.Message
+            }
+        }
+
         if (messageData.TargetUsers.some(user => user === userName)) {
             return {
                 type: "text",
