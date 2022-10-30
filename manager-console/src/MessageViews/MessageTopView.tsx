@@ -3,6 +3,9 @@ import { Button, Grid } from "@mui/material";
 import { CreateMessage } from "./Message/CreateMessage/CreateMessage";
 import { ListMessages } from "./Message/ListMessages/ListMessages"
 import { ModeWrapper } from "./Wrapper/ModeWrapper";
+import { CreateEasterEgg } from "./EasterEgg/CreateEasterEgg/CreateEasterEgg";
+import { ListEasterEggs } from "./EasterEgg/ListEasterEgg/ListEasterEgg";
+import { PaddingContent } from "./components/styled/Padding";
 
 export enum Mode {
     CREATE_MESSAGE_MODE = "CreateMessageMode",
@@ -34,6 +37,22 @@ export const MessageTopView: React.FC = () => {
                 <ListMessages />
             </ModeWrapper>
         );
+    }
+
+    if (mode === Mode.CREATE_EASTER_EGG_MODE) {
+        return (
+            <ModeWrapper mode={mode} handleSetMode={handleSetMode}>
+                <CreateEasterEgg />
+            </ModeWrapper>
+        )
+    };
+
+    if (mode === Mode.LIST_EASTER_EGG_MODE) {
+        return (
+            <ModeWrapper mode={mode} handleSetMode={handleSetMode}>
+                <ListEasterEggs />
+            </ModeWrapper>
+        )
     }
 
     // Top Mode

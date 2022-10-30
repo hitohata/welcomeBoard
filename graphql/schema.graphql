@@ -14,7 +14,7 @@ type ActiveUser {
 type EasterEgg {
     Keyword: ID!
     Kind: ID!
-    TargetUsers: [String!]
+    TargetUsers: [String!]!
     Message: String
 }
 

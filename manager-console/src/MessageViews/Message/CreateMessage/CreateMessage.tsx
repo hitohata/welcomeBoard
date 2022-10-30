@@ -1,7 +1,10 @@
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { AddMessageMutationVariables, MessageInput, useAddMessageMutation, useGetMessageLazyQuery } from "../../../graphql/generated"
+import { AddMessageMutationVariables, MessageInput, useAddMessageMutation, useDeleteMessageMutation, useGetMessageLazyQuery } from "../../../graphql/generated"
 import { LoadingHearts } from "utils/Loading";
+import { MarginTopComponent } from "MessageViews/components/styled/MarginTop";
+import { PaddingContent } from "MessageViews/components/styled/Padding";
+import { TargetUserList } from "MessageViews/Message/CreateMessage/TargetUserList";
 
 interface IProps {
     keyword?: string
@@ -12,7 +15,8 @@ export const CreateMessage:React.FC<IProps> = (props) => {
     const { keyword } = props;
 
     const [getMessage, getMessageState] = useGetMessageLazyQuery();
-    const [addMessage, addMessageState]= useAddMessageMutation()
+    const [addMessage, addMessageState]= useAddMessageMutation();
+    const [deleteMessage, deleteMessageState] = useDeleteMessageMutation()
 
     const [message, setMessage] = useState<AddMessageMutationVariables>({Keyword:"", Name: "", Message: ""})
 
@@ -45,6 +49,16 @@ export const CreateMessage:React.FC<IProps> = (props) => {
         })
     }
 
+    const handleDelete = () => {
+        if (message.Keyword) {
+			deleteMessage({
+				variables: {
+					Keyword: message.Keyword,
+				},
+			});
+		}
+    }
+
     const handleMessageInput = (key: keyof MessageInput) => (input: React.ChangeEvent<HTMLInputElement>) => {
         setMessage({
             ...message,
@@ -52,14 +66,20 @@ export const CreateMessage:React.FC<IProps> = (props) => {
         })
     };
 
+    const handleSelectUser = (user: string) => {
+        setMessage({
+            ...message,
+            Name: user
+        })
+    }
+
     if (getMessageState.loading) { return <LoadingHearts /> }
     if (addMessageState.loading) { return <LoadingHearts /> }
+    if (deleteMessageState.loading) { return <LoadingHearts /> }
 
     return (
-        <React.Fragment>
-            <Grid container={ true } sx={{
-                padding: 5
-            }}>
+        <PaddingContent>
+            <Grid container={ true }>
                 <Grid item={ true } xs={ 12 } sm={ 6 }>
                     { keyword
                         ? <Typography>{ keyword }</Typography>
@@ -73,12 +93,9 @@ export const CreateMessage:React.FC<IProps> = (props) => {
                     }
                 </Grid>
                 <Grid item={ true } xs={ 12 } sm={ 6 }>
-                    <TextField
-                        id="Name"
-                        label="Name"
-                        variant="standard"
-                        value={ message.Name || "" }
-                        onChange={ handleMessageInput("Name") }
+                    <TargetUserList
+                        targetUser={ message.Name ? message.Name : undefined }
+                        handleSelectUser={ handleSelectUser }
                     />
                 </Grid>
                 <Grid item={ true } xs={ 12 }>
@@ -93,18 +110,32 @@ export const CreateMessage:React.FC<IProps> = (props) => {
                         onChange={ handleMessageInput("Message") }
                     />
                 </Grid>
-                <Grid item={ true } xs={ 12 }>
-                    <Button
-                        onClick={ handlePost }
-                        variant="outlined"
-                    >
-                        Post
-                    </Button>
-                </Grid>
+                <MarginTopComponent>
+                    <Grid container={ true } spacing={ 5 }>
+                        <Grid item={ true } xs={ 6 }>
+                            <Button
+                                onClick={ handlePost }
+                                variant="outlined"
+                            >
+                                Post
+                            </Button>
+                        </Grid>
+                        <Grid item={ true } xs={ 6 }>
+                            <Button
+                                disabled={ message.Keyword ? false : true }
+                                onClick={ handleDelete }
+                                variant="outlined"
+                                color="secondary"
+                            >
+                                Delete
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </MarginTopComponent>
                 { getMessageState.error && <Typography>{getMessageState.error.message}</Typography> }
                 { addMessageState.error && <Typography>{ addMessageState.error.message }</Typography> }
             </Grid>
-        </React.Fragment>
+        </PaddingContent>
     )
 
 }

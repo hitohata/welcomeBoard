@@ -1,8 +1,9 @@
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { ListEasterEggsQuery, useListEasterEggsLazyQuery, useListEasterEggsQuery } from "graphql/generated";
+import { ListEasterEggsQuery, useListEasterEggsQuery } from "graphql/generated";
 import React, { useState } from "react";
 import { LoadingHearts } from "utils/Loading";
+import { CreateEasterEgg } from "MessageViews/EasterEgg/CreateEasterEgg/CreateEasterEgg";
 
 type UnwrapArray<T> = T extends Array<infer R> ? R : never
 
@@ -18,9 +19,12 @@ export const ListEasterEggs: React.FC = () => {
         <>
             <Box sx={{padding: 5}}>
                 {(data && data.listEasterEggs)
-                    ? data.listEasterEggs.map(el => (Me))
-                    : 
+                    ? data.listEasterEggs.map(el => (
+                        <EasterEgg Keyword={el!.Keyword} key={el!.Keyword} />
+                    ))
+                    : <Typography>Not Found</Typography>
                 }
+                { error && <Typography>{ error.message }</Typography> }
             </Box>
         </>
     )
@@ -36,7 +40,8 @@ const EasterEgg: React.FC<UnwrapArray<ListEasterEggsQuery['listEasterEggs']>> = 
                 open
                 ? (
                     <div>
-                        <Button onClick={() => setOpen(false)}></Button>
+                        <Button onClick={() => setOpen(false)}>Close</Button>
+                        <CreateEasterEgg keyword={ props?.Keyword } />
                     </div>
                 )
                 : (

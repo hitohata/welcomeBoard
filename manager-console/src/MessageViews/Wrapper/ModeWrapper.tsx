@@ -2,6 +2,7 @@ import { Button } from "@mui/material"
 import { ReactNode } from "react";
 import { Mode } from "../MessageTopView";
 import { Box } from "@mui/material";
+import { PaddingContent } from "MessageViews/components/styled/Padding";
 
 interface IProps {
     mode: Mode

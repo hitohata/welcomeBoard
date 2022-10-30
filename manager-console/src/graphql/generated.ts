@@ -27,7 +27,7 @@ export type EasterEgg = {
   Keyword: Scalars['ID'];
   Kind: Scalars['ID'];
   Message?: Maybe<Scalars['String']>;
-  TargetUsers?: Maybe<Array<Scalars['String']>>;
+  TargetUsers: Array<Scalars['String']>;
 };
 
 export type EasterEggInput = {
@@ -124,7 +124,7 @@ export type GetEasterEggQueryVariables = Exact<{
 }>;
 
 
-export type GetEasterEggQuery = { __typename?: 'Query', getEasterEgg?: { __typename?: 'EasterEgg', Keyword: string, TargetUsers?: Array<string> | null, Message?: string | null } | null };
+export type GetEasterEggQuery = { __typename?: 'Query', getEasterEgg?: { __typename?: 'EasterEgg', Keyword: string, TargetUsers: Array<string>, Message?: string | null } | null };
 
 export type ListEasterEggsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -152,7 +152,7 @@ export type AddEasterEggMutationVariables = Exact<{
 }>;
 
 
-export type AddEasterEggMutation = { __typename?: 'Mutation', addEasterEgg?: { __typename?: 'EasterEgg', Keyword: string, Message?: string | null, TargetUsers?: Array<string> | null } | null };
+export type AddEasterEggMutation = { __typename?: 'Mutation', addEasterEgg?: { __typename?: 'EasterEgg', Keyword: string, Message?: string | null, TargetUsers: Array<string> } | null };
 
 export type DeleteMessageMutationVariables = Exact<{
   Keyword?: Scalars['ID'];
