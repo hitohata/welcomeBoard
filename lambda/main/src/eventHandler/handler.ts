@@ -1,34 +1,41 @@
-import { WebhookEvent, Message, TextMessage, MessageEvent, PostbackEvent } from "@line/bot-sdk";
-import { HostLineClient, UserLineClient } from "./lineClients";
+import { WebhookEvent } from "@line/bot-sdk";
 import { ITextMessageHandler } from "./Handlers/textMessage";
 import { ImageHandler } from "./Handlers/image";
-import { IInformationHandler } from "./Handlers/informationHandler";
+import { IPostBackHandler } from "./Handlers/postbackHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
 import { IVideoHandler } from "./Handlers/videoHandler";
 import { IFollowHandler } from "./Handlers/followHandler";
+<<<<<<< HEAD
 
 interface IReplayMessage {
     userReplay: Message | Message[],
     hostBroadcast: Message | Message[]
 }
+=======
+import { ILineHostClient, ILineUserClient } from "lineClient/ILineClient";
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
 export class Handler {
-    private readonly userLineClient: UserLineClient;
-    private readonly hostLineClient: HostLineClient;
+    private readonly userLineClient: ILineUserClient;
+    private readonly hostLineClient: ILineHostClient;
     private readonly textMessageHandler: ITextMessageHandler
     private readonly imageHandler: ImageHandler;
     private readonly videoHandler: IVideoHandler;
-    private readonly informationHandler: IInformationHandler;
+    private readonly postBackHandler: IPostBackHandler;
     private readonly stickerHandler: IStickerHandler;
     private readonly followEventHandler: IFollowHandler
 
     constructor(
-        userLineClient: UserLineClient,
-        hostLineClient: HostLineClient,
+        userLineClient: ILineUserClient,
+        hostLineClient: ILineHostClient,
         textMessageHandler: ITextMessageHandler,
         imageHandler: ImageHandler,
         videoHandler: IVideoHandler,
+<<<<<<< HEAD
         informationHandler: IInformationHandler,
+=======
+        postBackHandler: IPostBackHandler,
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
         stickerHandler: IStickerHandler,
         followEventHandler: IFollowHandler
     ) {
@@ -37,7 +44,7 @@ export class Handler {
         this.textMessageHandler = textMessageHandler;
         this.imageHandler = imageHandler;
         this.videoHandler = videoHandler;
-        this.informationHandler = informationHandler;
+        this.postBackHandler = postBackHandler;
         this.stickerHandler = stickerHandler;
         this.followEventHandler = followEventHandler;
     }
@@ -49,6 +56,7 @@ export class Handler {
 
             if (event.message.type === "text") {
 
+<<<<<<< HEAD
                 const message = await this.textMessageHandling(event);
 
                 if (message) {
@@ -57,10 +65,23 @@ export class Handler {
                         this.hostLineClient.broadcast(message.hostBroadcast)
                     ])
                 }
+=======
+                const userName = await this.userLineClient.getUserName(event);
+
+                const replyMessage = await this.textMessageHandler.messageHandler(event.message, userName);
+
+                await Promise.all([
+                    this.userLineClient.replyMessage(replayToken, replyMessage.forUser),
+                    this.hostLineClient.broadcast(replyMessage.forHost)
+                ])
+
+                return;
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
             };
 
             if (event.message.type === "image" && event.source.userId) {
 
+<<<<<<< HEAD
                 // this is for the beta
                 const userName = await this.userLineClient.getUserName(event);
                 await Promise.all([
@@ -76,13 +97,21 @@ export class Handler {
 
                 return;
 
+=======
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
                 const userId = event.source.userId;
-                await this.imageHandler.handleImage(event.message, userId);
+                const message = await this.imageHandler.handleImage(event.message, userId);
+
+                if (message) {
+                    await this.userLineClient.replyMessage(replayToken, message);
+                }
+
                 return;
             };
 
             if (event.message.type === "video" && event.message.contentProvider.type === "line" && event.source.userId) {
 
+<<<<<<< HEAD
                 const userName = await this.userLineClient.getUserName(event);
 
                 // this is for the beta test.
@@ -99,6 +128,14 @@ export class Handler {
                 return;
 
                 await this.videoHandler.handleVideo(event.message, event.source.userId);
+=======
+                const message = await this.videoHandler.handleVideo(event.message, event.source.userId);
+
+                if (message) {
+                    await this.userLineClient.replyMessage(replayToken, message);
+                }
+
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
                 return;
             }
 
@@ -113,11 +150,9 @@ export class Handler {
 
         if (event.type === "postback") {
             const replayToken = event.replyToken;
-            const message = await this.postbackEventHandling(event);
-            if (message) {
-                await this.userLineClient.replyMessage(replayToken, message)
-                return;
-            }
+            const message = await this.postBackHandler.postbackEventHandler(event);
+            await this.userLineClient.replyMessage(replayToken, message)
+            return;
         };
 
         if (event.type === "follow") {
@@ -139,6 +174,7 @@ export class Handler {
         return;
     };
 
+<<<<<<< HEAD
     /**
      * replay message
      * @param event MessageEvent
@@ -248,4 +284,6 @@ export class Handler {
         return undefined;
     }
 
+=======
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 }

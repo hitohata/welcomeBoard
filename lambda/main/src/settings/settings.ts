@@ -1,5 +1,3 @@
-import { Config } from "@line/bot-sdk";
-
 export class Settings {
     private readonly channelToken: string;
     private readonly channelSecret: string;

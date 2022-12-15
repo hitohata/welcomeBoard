@@ -1,10 +1,19 @@
-import { Message, TextEventMessage } from "@line/bot-sdk";
+import { TextEventMessage, TextMessage } from "@line/bot-sdk";
 import { IMessageDb } from "database/dynamoDb/IMessageDb";
 
+interface IReplyMessage {
+    forUser: TextMessage,
+    forHost: TextMessage
+}
+
 export interface ITextMessageHandler {
+<<<<<<< HEAD
     messageHandler(textMessageEvent: TextEventMessage): Promise<Message | undefined>
     easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined>
     incorrectMessageHandler(textMessageEvent: TextEventMessage): Message
+=======
+    messageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<IReplyMessage>
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 }
 
 export class TextMessageHandler implements ITextMessageHandler {
@@ -17,15 +26,60 @@ export class TextMessageHandler implements ITextMessageHandler {
         this.messageDbClient = messageDbClient;
     };
 
-    public async messageHandler(textMessageEvent: TextEventMessage): Promise<Message | undefined> {
+    public async messageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<IReplyMessage> {
 
         const userInput = textMessageEvent.text;
 
+<<<<<<< HEAD
+=======
+        const [message, easterEggMessage] = await Promise.all([
+            this.getMessage(userInput, userName),
+            this.getEasterEggMessage(userInput, userName)
+        ])
+
+        // get correct message
+        if (message) {
+            return {
+                forUser: message,
+                forHost: {
+                    type: "text",
+                    text: `${userName} gets a correct message!!`
+                }
+            }
+        }
+
+        if (easterEggMessage) {
+            return {
+                forUser: easterEggMessage,
+                forHost: {
+                    type: "text",
+                    text: `${userName} gets an easter egg message.\nInput: ${userInput}`
+                }
+            }
+        }
+
+        return {
+            forUser: this.incorrectMessageHandler(userInput),
+            forHost: {
+                type: "text",
+                text: `${userName} < ${userInput}`
+            }
+        }
+    }
+
+    private async getMessage(userInput: string, userName: string): Promise<TextMessage | null> {
+
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
         const messageData = await this.messageDbClient.getMessage(userInput);
 
         if (!messageData) {
-            return undefined;
+            return null;
         };
+
+        // is not for appropriate user
+        if (messageData.Name !== userName) {
+            return null;
+        }
 
         return {
             type: "text",
@@ -33,6 +87,7 @@ export class TextMessageHandler implements ITextMessageHandler {
         }
     }
 
+<<<<<<< HEAD
     public async easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined> {
         const userInput = textMessageEvent.text;
 
@@ -61,8 +116,36 @@ export class TextMessageHandler implements ITextMessageHandler {
     }
 
     public incorrectMessageHandler(textMessageEvent: TextEventMessage): Message {
+=======
+    private async getEasterEggMessage(userInput: string, userName: string): Promise<TextMessage | null> {
+>>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
-        const incorrectMessage = textMessageEvent.text;
+        const messageData = await this.messageDbClient.getEasterEgg(userInput);
+
+        if (!messageData) {
+            return null;
+        };
+
+        // for wild card
+        if (messageData.TargetUsers.length === 0) {
+            return {
+                type: "text",
+                text: messageData.Message
+            }
+        }
+
+        if (messageData.TargetUsers.some(user => user === userName)) {
+            return {
+                type: "text",
+                text: messageData.Message
+            }
+        };
+
+        return null;
+
+    }
+
+    private incorrectMessageHandler(incorrectMessage: string): TextMessage {
 
         const seed = Math.floor(Math.random() * 5);
         let message = "";
