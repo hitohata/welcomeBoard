@@ -68,11 +68,6 @@ export class PostBackHandler implements IPostBackHandler {
         const seatingChartImageUrl = this.distribution.getSeatingChartUrl();
 
         return {
-            type: "text",
-            text: "きまってないんですよー"
-        }
-
-        return {
             type: "image",
             originalContentUrl: seatingChartImageUrl,
             previewImageUrl: seatingChartImageUrl
