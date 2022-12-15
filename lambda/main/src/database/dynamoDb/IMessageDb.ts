@@ -15,14 +15,39 @@ export interface IMessage {
     Message: string
 }
 
+export interface IEasterEgg {
+    Keyword: string,
+    TargetUsers: string[],
+    Message: string
+}
+
 export interface IProfile {
     Profile: string
 }
 
+export interface IActiveUser {
+    UserName: string
+}
+
+export interface IIMage {
+    Uri: string
+}
+
+export interface IVideo {
+    Uri: string
+}
+
 export interface IMessageDb {
+    putActiveUserName(userNames: string[]): Promise<void>
+    getActiveUserNames(): Promise<string[]>
     getLocation(): Promise<ILocationInfo>
     getWaddingDate(): Promise<IDateTime>
     getMessage(keyword: string): Promise<IMessage | undefined>
+    getEasterEgg(keyword: string): Promise<IEasterEgg | undefined>
     getBrideProfile(): Promise<IProfile>
     getGroomProfile(): Promise<IProfile>
+    putImageUri(uri: string): Promise<void>
+    putVideoUri(uri: string): Promise<void>
+    getImageUri(): Promise<IIMage>
+    getVideoUri(): Promise<IVideo>
 };

@@ -1,4 +1,3 @@
-import { IProfile } from "database/dynamoDb/IMessageDb";
 import { IDistribution, IProfileImageUrl } from "./IDistribution";
 
 export class Distribution implements IDistribution {
@@ -38,4 +37,13 @@ export class Distribution implements IDistribution {
             thumbnailImageUrl: `${this.distribution}/information-folder/profiles/bride-preview.jpg`
        }
     };
+
+    /**
+     * add the distribution host to the bucket prefix.
+     * @param bucketPrefix 
+     * @returns 
+     */
+    public userContentUri(bucketPrefix: string): string {
+        return `${this.distribution}/${bucketPrefix}`;
+    }
 }

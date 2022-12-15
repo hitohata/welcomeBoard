@@ -1,4 +1,4 @@
-import { Client, validateSignature, MessageEvent } from "@line/bot-sdk";
+import { Client, validateSignature, MessageEvent, FollowEvent } from "@line/bot-sdk";
 import { Settings } from "settings/settings";
 
 
@@ -33,13 +33,12 @@ export class UserLineClient extends Client {
      * @param event 
      * @returns 
      */
-    public async getUserName(event: MessageEvent): Promise<string> {
+    public async getUserName(event: MessageEvent | FollowEvent): Promise<string> {
 
         const userId = event.source.userId; 
         const userProfile = await this.getProfile(userId!);
         return userProfile.displayName;
     }
-
 }
 
 export class HostLineClient extends Client {

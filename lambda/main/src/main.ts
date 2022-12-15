@@ -1,20 +1,21 @@
 import { WebhookRequestBody } from "@line/bot-sdk";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { HostLineClient, UserLineClient } from "eventHandler/lineClients";
 import { Handler } from "eventHandler/handler";
 import { handlersFactory } from "eventHandler/Handlers/handlers";
-import { MessageDb } from "database/dynamoDb/messageDb";
+import { ILineUserClient, ILineHostClient } from "lineClient/ILineClient";
+import { UserLineClient, HostLineClient } from "lineClient/LineClient";
 
 export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
+    console.log(event);
+
     const lineSignature: string = event.headers['x-line-signature']!;
 
-    const lineClient = new UserLineClient(lineSignature, event.body);
+    const lineClient: ILineUserClient = new UserLineClient(lineSignature, event.body);
 
-    const hostClient = new HostLineClient();
+    const hostClient: ILineHostClient = new HostLineClient();
 
-
-    const handlers = handlersFactory(new MessageDb(), lineClient);
+    const handlers = handlersFactory(lineClient);
 
     const handler = new Handler(
         lineClient,
@@ -23,7 +24,8 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
         handlers.imageHandler,
         handlers.videoHandler,
         handlers.informationHandler,
-        handlers.stickerHandler
+        handlers.stickerHandler,
+        handlers.followEventHandler
     );
 
     const body: WebhookRequestBody = JSON.parse(event.body!);

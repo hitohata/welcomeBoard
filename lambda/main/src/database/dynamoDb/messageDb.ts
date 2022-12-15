@@ -1,6 +1,6 @@
-import { DynamoDBClient, GetItemCommand, GetItemCommandInput } from "@aws-sdk/client-dynamodb";
-import { unmarshall, marshall } from "@aws-sdk/util-dynamodb";
-import { IDateTime, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
+import { DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { IDateTime, IEasterEgg, IIMage, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -8,11 +8,61 @@ export class MessageDb implements IMessageDb {
 
     private readonly kindInformation = "Information";
     private readonly kindMessage = "Message";
+    private readonly easterEgg = "EasterEgg";
+    private readonly systemInformation = "SystemInformation";
+    private readonly image = "Image";
+    private readonly video = "Video";
 
     constructor(){
         this.client = new DynamoDBClient({ region: process.env.REGION });
         this.tableName = process.env.TABLE_NAME!;
     };
+
+    /**
+     * putUserName
+     */
+    public async putActiveUserName(userNames: string[]): Promise<void> {
+        const pkName = "ActiveUsers";
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": pkName },
+                "Kind": { "S": this.systemInformation },
+                "ActiveUsers": { "L": userNames.map(user => ({ "S": user })) }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+
+    }
+
+    public async getActiveUserNames(): Promise<string[]> {
+        const pkName = "ActiveUsers";
+
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": pkName },
+                "Kind": { "S": this.systemInformation }
+            }
+        }
+
+        const getItemCommand = new GetItemCommand(param)
+
+        const getResult = await this.client.send(getItemCommand);
+
+        if (!getResult.Item) {
+            return []
+        };
+
+        const item = unmarshall(getResult.Item);
+
+        return item.ActiveUsers
+
+    }
 
     public async getLocation(): Promise<ILocationInfo> {
 
@@ -104,6 +154,33 @@ export class MessageDb implements IMessageDb {
         return message;
     };
 
+    public async getEasterEgg(keyword: string): Promise<IEasterEgg | undefined> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": keyword },
+                "Kind": { "S": this.easterEgg }
+            }
+        };
+
+        const getItemCommand = new GetItemCommand(param);
+        const dynamoOutput = await this.client.send(getItemCommand);
+
+        if (!dynamoOutput.Item) {
+            return undefined;
+        };
+
+        const item = unmarshall(dynamoOutput.Item);
+
+        const message: IEasterEgg = {
+            Keyword: item.Keyword,
+            TargetUsers: item.TargetUsers,
+            Message: item.Message
+        };
+
+        return message;
+    }
+
     public async getBrideProfile(): Promise<IProfile> {
         const param: GetItemCommandInput = {
             TableName: this.tableName,
@@ -113,12 +190,8 @@ export class MessageDb implements IMessageDb {
             }
         };
 
-        console.log(param);
-
         const getCommand = new GetItemCommand(param);
         const brideProfile = await this.client.send(getCommand);
-
-        console.log(brideProfile);
 
         if (!brideProfile.Item) {
             throw new Error("Bride profile is not found.");
@@ -155,4 +228,90 @@ export class MessageDb implements IMessageDb {
         };
 
     };
+
+    public async putImageUri(uri: string): Promise<void> {
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": "Image" },
+                "Kind": { "S": this.image },
+                "Uri": { "S": uri }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+    }
+
+    public async putVideoUri(uri: string): Promise<void> {
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": "Video" },
+                "Kind": { "S": this.video },
+                "Uri": { "S": uri }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+    }
+
+    public async getImageUri(): Promise<IIMage> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "Image" },
+                "Kind": { "S": this.image }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const imageUri = await this.client.send(getCommand);
+
+        if (!imageUri.Item) {
+            // TODO: initial data
+            return {
+                Uri: ""
+            }
+        };
+
+        const item = unmarshall(imageUri.Item);
+
+        return {
+            Uri: item.Uri
+        }
+
+    }
+
+    public async getVideoUri(): Promise<IIMage> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "Video" },
+                "Kind": { "S": this.video }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const videoUri = await this.client.send(getCommand);
+
+        if (!videoUri.Item) {
+            // TODO: initial data
+            return {
+                Uri: ""
+            }
+        };
+
+        const item = unmarshall(videoUri.Item);
+
+        return {
+            Uri: item.Uri
+        }
+
+    }
 }

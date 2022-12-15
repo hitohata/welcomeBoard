@@ -1,41 +1,40 @@
-import { WebhookEvent, Message, TextMessage, MessageEvent, PostbackEvent } from "@line/bot-sdk";
-import { HostLineClient, UserLineClient } from "./lineClients";
+import { WebhookEvent } from "@line/bot-sdk";
 import { ITextMessageHandler } from "./Handlers/textMessage";
 import { ImageHandler } from "./Handlers/image";
-import { IInformationHandler } from "./Handlers/informationHandler";
+import { IPostBackHandler } from "./Handlers/postbackHandler";
 import { IStickerHandler } from "./Handlers/stickerHandler";
 import { IVideoHandler } from "./Handlers/videoHandler";
-
-interface IReplayMessage {
-    userReplay: Message | Message[],
-    hostBroadcast: Message | Message[]
-}
+import { IFollowHandler } from "./Handlers/followHandler";
+import { ILineHostClient, ILineUserClient } from "lineClient/ILineClient";
 
 export class Handler {
-    private readonly userLineClient: UserLineClient;
-    private readonly hostLineClient: HostLineClient;
+    private readonly userLineClient: ILineUserClient;
+    private readonly hostLineClient: ILineHostClient;
     private readonly textMessageHandler: ITextMessageHandler
     private readonly imageHandler: ImageHandler;
     private readonly videoHandler: IVideoHandler;
-    private readonly informationHandler: IInformationHandler;
+    private readonly postBackHandler: IPostBackHandler;
     private readonly stickerHandler: IStickerHandler;
+    private readonly followEventHandler: IFollowHandler
 
     constructor(
-        userLineClient: UserLineClient,
-        hostLineClient: HostLineClient,
+        userLineClient: ILineUserClient,
+        hostLineClient: ILineHostClient,
         textMessageHandler: ITextMessageHandler,
         imageHandler: ImageHandler,
         videoHandler: IVideoHandler,
-        informationHandler: IInformationHandler,
-        stickerHandler: IStickerHandler
+        postBackHandler: IPostBackHandler,
+        stickerHandler: IStickerHandler,
+        followEventHandler: IFollowHandler
     ) {
         this.userLineClient = userLineClient;
         this.hostLineClient = hostLineClient;
         this.textMessageHandler = textMessageHandler;
         this.imageHandler = imageHandler;
         this.videoHandler = videoHandler;
-        this.informationHandler = informationHandler;
+        this.postBackHandler = postBackHandler;
         this.stickerHandler = stickerHandler;
+        this.followEventHandler = followEventHandler;
     }
 
     public async checkEvent(event: WebhookEvent): Promise<void> {
@@ -44,28 +43,45 @@ export class Handler {
             const replayToken = event.replyToken;
 
             if (event.message.type === "text") {
-                const message = await this.textMessageHandling(event);
-                if (message) {
+
+                const userName = await this.userLineClient.getUserName(event);
+
+                const replyMessage = await this.textMessageHandler.messageHandler(event.message, userName);
+
                 await Promise.all([
-                    this.userLineClient.replyMessage(replayToken, message.userReplay),
-                    this.hostLineClient.broadcast(message.hostBroadcast)
-                ])}
+                    this.userLineClient.replyMessage(replayToken, replyMessage.forUser),
+                    this.hostLineClient.broadcast(replyMessage.forHost)
+                ])
+
+                return;
             };
 
             if (event.message.type === "image" && event.source.userId) {
+
                 const userId = event.source.userId;
-                await this.imageHandler.handleImage(event.message, userId);
+                const message = await this.imageHandler.handleImage(event.message, userId);
+
+                if (message) {
+                    await this.userLineClient.replyMessage(replayToken, message);
+                }
+
                 return;
             };
 
             if (event.message.type === "video" && event.message.contentProvider.type === "line" && event.source.userId) {
-                await this.videoHandler.handleVideo(event.message, event.source.userId);
+
+                const message = await this.videoHandler.handleVideo(event.message, event.source.userId);
+
+                if (message) {
+                    await this.userLineClient.replyMessage(replayToken, message);
+                }
+
                 return;
             }
 
             // replay sticker
             if (event.message.type === "sticker") {
-                const replyStickerMessage = this.stickerHandler.getPositiveStickerMessage();
+                const replyStickerMessage = await this.stickerHandler.getPositiveStickerMessage();
 
                 await this.userLineClient.replyMessage(event.replyToken, replyStickerMessage)
                 return;
@@ -74,25 +90,18 @@ export class Handler {
 
         if (event.type === "postback") {
             const replayToken = event.replyToken;
-            const message = await this.postbackEventHandling(event);
-            if (message) {
-                await this.userLineClient.replyMessage(replayToken, message)
-                return;
-            }
+            const message = await this.postBackHandler.postbackEventHandler(event);
+            await this.userLineClient.replyMessage(replayToken, message)
+            return;
         };
 
-        if (event.type === "memberJoined") {
-            const userNames = await Promise.all(
-                event.joined.members.map((async (el) => {
-                    const userProfile = await this.userLineClient.getProfile(el.userId);
-                    return userProfile.displayName;
-                }))
-            )
+        if (event.type === "follow") {
 
-            await this.hostLineClient.broadcast({
-                type: "text",
-                text: userNames.join(",")
-            })
+            const followNotificationMessage = await this.followEventHandler.handleFollowEvent(event)
+
+            await this.hostLineClient.broadcast(followNotificationMessage);
+
+            return;
         }
 
         console.error(event);
@@ -104,83 +113,5 @@ export class Handler {
 
         return;
     };
-
-    /**
-     * replay message
-     * @param event MessageEvent
-     * @returns
-     */
-    private async textMessageHandling(event: MessageEvent): Promise<IReplayMessage | undefined> {
-
-        if (event.message.type !== "text") {
-            throw new Error("Not a text");
-        }
-
-        const [message, userName]= await Promise.all([
-            this.textMessageHandler.messageHandler(event.message),
-            this.userLineClient.getUserName(event)
-        ]);
-
-        // get correct message
-        if (message) {
-
-            const correctMessage: TextMessage = {
-                type: "text",
-                text: `${userName} gets a correct message!!`
-            };
-
-            return {
-                userReplay: message,
-                hostBroadcast: correctMessage
-            }
-        }
-
-        const incorrectMessage = this.textMessageHandler.incorrectMessageHandler(event.message);
-        const negativeSticker = this.stickerHandler.getNegativeStickerMessage()
-
-        const toHostMessage: TextMessage = {
-                type: "text",
-                text: `${userName} < ${event.message.text}`
-            }
-
-        return {
-            userReplay: [negativeSticker, incorrectMessage],
-            hostBroadcast: toHostMessage
-        }
-
-    }
-
-    // return information
-    private async postbackEventHandling(event: PostbackEvent): Promise<Message | Message[] | undefined> {
-        const replyToken = event.replyToken;
-
-        const postBackData = event.postback.data;
-
-        if (postBackData === this.informationHandler.location) {
-            return await this.informationHandler.locationInformation();
-        };
-
-        if (postBackData === this.informationHandler.dateTime) {
-            return await this.informationHandler.dateTimeInformation();
-        };
-
-        if (postBackData === this.informationHandler.groomProfile) {
-            return await this.informationHandler.getGroomProfileMessage();
-        };
-
-        if (postBackData === this.informationHandler.brideProfile) {
-            return await this.informationHandler.getBrideProfileMessage();
-        };
-
-        if (postBackData === this.informationHandler.menu) {
-            return this.informationHandler.menuImageMessage();
-        };
-
-        if (postBackData === this.informationHandler.seatingChart) {
-            return this.informationHandler.seatingChartImageMessage();
-        };
-
-        return undefined;
-    }
 
 }
