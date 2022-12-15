@@ -1,0 +1,20 @@
+{
+    "destination": "Uaba925e14ff42f6c4f5f0a2ae33f7f23",
+    "events":[
+        {
+            "type":"message",
+            "message": {
+                "type":"image",
+                "id":"17235987148778",
+                "contentProvider": {
+                    "type":"line"
+                }
+                },
+                "webhookEventId":"01GKE24KAPCTP74TDBT73RVBPS","deliveryContext":{"isRedelivery":false},"timestamp":1670140545929,"source":{"type":"user","userId":"Uc3c5eb7d95d99cc0fe39418a48c3f053"},"replyToken":"71f1306a20f24cf7b85666d1e382f1b6","mode":"active"}]}
+
+{
+    "destination":"Uaba925e14ff42f6c4f5f0a2ae33f7f23",
+    "events":[
+        {
+            "type":"message",
+            "message":{"type":"image","id":"17236008543705","contentProvider":{"type":"line"},"imageSet":{"id":"5868A6B88A03729E6F36ED1F491E2456549C0BCCB2B80C6072B527B38FCC0352","index":1,"total":2}},"webhookEventId":"01GKE2EA7WF3A3KE483PV2PG6Z","deliveryContext":{"isRedelivery":false},"timestamp":1670140864558,"source":{"type":"user","userId":"Uc3c5eb7d95d99cc0fe39418a48c3f053"},"replyToken":"c553b7ceaac548c69fb5808bd8742452","mode":"active"}]}

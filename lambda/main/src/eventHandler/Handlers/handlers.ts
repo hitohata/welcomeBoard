@@ -1,18 +1,25 @@
 import { TextMessageHandler } from "./textMessage";
-import { IMessageDb } from "database/dynamoDb/IMessageDb";
 import { ImageHandler } from "./image";
 import { VideoHandler } from "./videoHandler";
-import { InformationHandler } from "./informationHandler";
+import { PostBackHandler } from "./postbackHandler";
 import { StickerHandler } from "./stickerHandler";
 import { FollowEventHandler } from "./followHandler";
-import { UserLineClient } from "eventHandler/lineClients";
+import { Distribution } from "database/distribution/Distribution";
+import { S3ImageBucket } from "database/s3Bucket/S3Bucket";
+import { MessageDb } from "database/dynamoDb/messageDb";
+import { ILineUserClient } from "lineClient/ILineClient";
 
-export const handlersFactory = (messageDb: IMessageDb, lineClient: UserLineClient) => {
+export const handlersFactory = (lineClient: ILineUserClient) => {
+
+    const messageDb = new MessageDb()
+    const s3Bucket = new S3ImageBucket();
+    const distribution = new Distribution();
+
     return {
         textMessageHandler: new TextMessageHandler(messageDb),
-        imageHandler: new ImageHandler(lineClient),
-        videoHandler: new VideoHandler(lineClient),
-        informationHandler: new InformationHandler(messageDb),
+        imageHandler: new ImageHandler(lineClient, s3Bucket, messageDb, distribution),
+        videoHandler: new VideoHandler(lineClient, s3Bucket, messageDb, distribution),
+        informationHandler: new PostBackHandler(messageDb, distribution),
         stickerHandler: new StickerHandler(),
         followEventHandler: new FollowEventHandler(lineClient, messageDb)
     }

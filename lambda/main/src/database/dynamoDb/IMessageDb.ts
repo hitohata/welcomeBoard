@@ -29,6 +29,14 @@ export interface IActiveUser {
     UserName: string
 }
 
+export interface IIMage {
+    Uri: string
+}
+
+export interface IVideo {
+    Uri: string
+}
+
 export interface IMessageDb {
     putActiveUserName(userNames: string[]): Promise<void>
     getActiveUserNames(): Promise<string[]>
@@ -38,4 +46,8 @@ export interface IMessageDb {
     getEasterEgg(keyword: string): Promise<IEasterEgg | undefined>
     getBrideProfile(): Promise<IProfile>
     getGroomProfile(): Promise<IProfile>
+    putImageUri(uri: string): Promise<void>
+    putVideoUri(uri: string): Promise<void>
+    getImageUri(): Promise<IIMage>
+    getVideoUri(): Promise<IVideo>
 };

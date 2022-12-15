@@ -73,7 +73,7 @@ export class WelcomeBoardStack extends Stack {
       }
     );
 
-    messageTable.grantReadData(messageFunction);
+    messageTable.grantFullAccess(messageFunction);
     imageContentsBucket.grantReadWrite(messageFunction);
 
     const api = new apiGateway.RestApi(this, "lineWebhookApi");

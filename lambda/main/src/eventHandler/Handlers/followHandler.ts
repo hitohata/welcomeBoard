@@ -1,16 +1,16 @@
-import { Client, FollowEvent, Message, User } from "@line/bot-sdk";
+import { FollowEvent, Message } from "@line/bot-sdk";
 import { IMessageDb } from "database/dynamoDb/IMessageDb";
-import { UserLineClient } from "eventHandler/lineClients";
+import { ILineUserClient } from "lineClient/ILineClient";
 
 export interface IFollowHandler {
     handleFollowEvent(followEvent: FollowEvent): Promise<Message>
 }
 
 export class FollowEventHandler {
-    private readonly lineClient: UserLineClient;
+    private readonly lineClient: ILineUserClient;
     private readonly messageDb: IMessageDb
 
-    constructor(lineClient: UserLineClient, messageDb: IMessageDb) {
+    constructor(lineClient: ILineUserClient, messageDb: IMessageDb) {
         this.lineClient = lineClient;
         this.messageDb = messageDb;
     }

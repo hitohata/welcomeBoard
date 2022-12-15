@@ -29,13 +29,6 @@ export class WelcomeBoardManagerFrontStack extends Stack {
                 })
             },
             defaultRootObject: "index.html",
-            // errorResponses: [
-            //     {
-            //         httpStatus: 404,
-            //         responseHttpStatus: 200,
-            //         responsePagePath: "./index.html"
-            //     }
-            // ]
         });
 
         new s3deploy.BucketDeployment(this, "MessageConsole", {
