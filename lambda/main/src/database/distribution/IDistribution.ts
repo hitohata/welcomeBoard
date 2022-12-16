@@ -8,4 +8,5 @@ export interface IDistribution {
     getSeatingChartUrl(): string,
     getGroomImages(): IProfileImageUrl,
     getBrideImages(): IProfileImageUrl
+    userContentUri(bucketPrefix: string): string
 }

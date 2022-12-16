@@ -1,6 +1,6 @@
 import { DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-import { IDateTime, IEasterEgg, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
+import { IDateTime, IEasterEgg, IIMage, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -9,7 +9,9 @@ export class MessageDb implements IMessageDb {
     private readonly kindInformation = "Information";
     private readonly kindMessage = "Message";
     private readonly easterEgg = "EasterEgg";
-    private readonly systemInformation = "SystemInformation"
+    private readonly systemInformation = "SystemInformation";
+    private readonly image = "Image";
+    private readonly video = "Video";
 
     constructor(){
         this.client = new DynamoDBClient({ region: process.env.REGION });
@@ -226,4 +228,88 @@ export class MessageDb implements IMessageDb {
         };
 
     };
+
+    public async putImageUri(uri: string): Promise<void> {
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": "Image" },
+                "Kind": { "S": this.image },
+                "Uri": { "S": uri }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+    }
+
+    public async putVideoUri(uri: string): Promise<void> {
+
+        const param: PutItemCommandInput = {
+            TableName: this.tableName,
+            Item: {
+                "Keyword": { "S": "Video" },
+                "Kind": { "S": this.video },
+                "Uri": { "S": uri }
+            }
+        }
+
+        const putItemCommand = new PutItemCommand(param);
+
+        await this.client.send(putItemCommand);
+    }
+
+    public async getImageUri(): Promise<IIMage> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "Image" },
+                "Kind": { "S": this.image }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const imageUri = await this.client.send(getCommand);
+
+        if (!imageUri.Item) {
+            return {
+                Uri: "default-images/default-image.jpg"
+            }
+        };
+
+        const item = unmarshall(imageUri.Item);
+
+        return {
+            Uri: item.Uri
+        }
+
+    }
+
+    public async getVideoUri(): Promise<IIMage> {
+        const param: GetItemCommandInput = {
+            TableName: this.tableName,
+            Key: {
+                "Keyword": { "S": "Video" },
+                "Kind": { "S": this.video }
+            }
+        };
+
+        const getCommand = new GetItemCommand(param);
+        const videoUri = await this.client.send(getCommand);
+
+        if (!videoUri.Item) {
+            return {
+                Uri: "default-images/default-video.mp4"
+            }
+        };
+
+        const item = unmarshall(videoUri.Item);
+
+        return {
+            Uri: item.Uri
+        }
+
+    }
 }
