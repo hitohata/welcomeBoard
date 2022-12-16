@@ -274,9 +274,8 @@ export class MessageDb implements IMessageDb {
         const imageUri = await this.client.send(getCommand);
 
         if (!imageUri.Item) {
-            // TODO: initial data
             return {
-                Uri: ""
+                Uri: "default-images/default-image.jpg"
             }
         };
 
@@ -301,9 +300,8 @@ export class MessageDb implements IMessageDb {
         const videoUri = await this.client.send(getCommand);
 
         if (!videoUri.Item) {
-            // TODO: initial data
             return {
-                Uri: ""
+                Uri: "default-images/default-video.mp4"
             }
         };
 
