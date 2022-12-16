@@ -15,11 +15,7 @@ export const lambdaHandler = async  (event: APIGatewayProxyEvent) => {
 
     const hostClient: ILineHostClient = new HostLineClient();
 
-<<<<<<< HEAD
-    const handlers = handlersFactory(new MessageDb(), lineClient);
-=======
     const handlers = handlersFactory(lineClient);
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
     const handler = new Handler(
         lineClient,

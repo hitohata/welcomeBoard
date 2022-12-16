@@ -7,13 +7,7 @@ interface IReplyMessage {
 }
 
 export interface ITextMessageHandler {
-<<<<<<< HEAD
-    messageHandler(textMessageEvent: TextEventMessage): Promise<Message | undefined>
-    easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined>
-    incorrectMessageHandler(textMessageEvent: TextEventMessage): Message
-=======
     messageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<IReplyMessage>
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 }
 
 export class TextMessageHandler implements ITextMessageHandler {
@@ -30,8 +24,6 @@ export class TextMessageHandler implements ITextMessageHandler {
 
         const userInput = textMessageEvent.text;
 
-<<<<<<< HEAD
-=======
         const [message, easterEggMessage] = await Promise.all([
             this.getMessage(userInput, userName),
             this.getEasterEggMessage(userInput, userName)
@@ -69,7 +61,6 @@ export class TextMessageHandler implements ITextMessageHandler {
 
     private async getMessage(userInput: string, userName: string): Promise<TextMessage | null> {
 
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
         const messageData = await this.messageDbClient.getMessage(userInput);
 
         if (!messageData) {
@@ -87,38 +78,7 @@ export class TextMessageHandler implements ITextMessageHandler {
         }
     }
 
-<<<<<<< HEAD
-    public async easterEggMessageHandler(textMessageEvent: TextEventMessage, userName: string): Promise<Message | undefined> {
-        const userInput = textMessageEvent.text;
-
-        const messageData = await this.messageDbClient.getEasterEgg(userInput);
-
-        if (!messageData) {
-            return undefined;
-        };
-
-        if (messageData.TargetUsers.length === 0) {
-            return {
-                type: "text",
-                text: messageData.Message
-            }
-        }
-
-        if (messageData.TargetUsers.some(user => user === userName)) {
-            return {
-                type: "text",
-                text: messageData.Message
-            }
-        };
-
-        return undefined;
-
-    }
-
-    public incorrectMessageHandler(textMessageEvent: TextEventMessage): Message {
-=======
     private async getEasterEggMessage(userInput: string, userName: string): Promise<TextMessage | null> {
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
         const messageData = await this.messageDbClient.getEasterEgg(userInput);
 

@@ -1,10 +1,6 @@
 import { DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
-<<<<<<< HEAD
-import { IDateTime, IEasterEgg, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
-=======
 import { IDateTime, IEasterEgg, IIMage, ILocationInfo, IMessage, IMessageDb, IProfile } from "./IMessageDb";
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
 export class MessageDb implements IMessageDb {
     private readonly client: DynamoDBClient;
@@ -13,13 +9,9 @@ export class MessageDb implements IMessageDb {
     private readonly kindInformation = "Information";
     private readonly kindMessage = "Message";
     private readonly easterEgg = "EasterEgg";
-<<<<<<< HEAD
-    private readonly systemInformation = "SystemInformation"
-=======
     private readonly systemInformation = "SystemInformation";
     private readonly image = "Image";
     private readonly video = "Video";
->>>>>>> 99c5871f73bc511df2d940b03a9d149fcf13f9af
 
     constructor(){
         this.client = new DynamoDBClient({ region: process.env.REGION });
@@ -282,9 +274,8 @@ export class MessageDb implements IMessageDb {
         const imageUri = await this.client.send(getCommand);
 
         if (!imageUri.Item) {
-            // TODO: initial data
             return {
-                Uri: ""
+                Uri: "default-images/default-image.jpg"
             }
         };
 
@@ -309,9 +300,8 @@ export class MessageDb implements IMessageDb {
         const videoUri = await this.client.send(getCommand);
 
         if (!videoUri.Item) {
-            // TODO: initial data
             return {
-                Uri: ""
+                Uri: "default-images/default-video.mp4"
             }
         };
 
