@@ -35,7 +35,7 @@ export class TextMessageHandler implements ITextMessageHandler {
                 forUser: message,
                 forHost: {
                     type: "text",
-                    text: `${userName} gets a correct message!!`
+                    text: `${userName} gets a correct message!!\nInput: ${userInput}`
                 }
             }
         }
@@ -74,7 +74,7 @@ export class TextMessageHandler implements ITextMessageHandler {
 
         return {
             type: "text",
-            text: `${messageData.Name}\n${messageData.Message}`
+            text: `${messageData.Message}`
         }
     }
 
