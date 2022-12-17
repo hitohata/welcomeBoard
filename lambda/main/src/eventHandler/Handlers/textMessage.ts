@@ -1,8 +1,9 @@
-import { TextEventMessage, TextMessage } from "@line/bot-sdk";
+import { Message, TextEventMessage, TextMessage } from "@line/bot-sdk";
 import { IMessageDb } from "database/dynamoDb/IMessageDb";
+import { StickerHandler } from "./stickerHandler";
 
 interface IReplyMessage {
-    forUser: TextMessage,
+    forUser: Message | Message[],
     forHost: TextMessage
 }
 
@@ -105,10 +106,11 @@ export class TextMessageHandler implements ITextMessageHandler {
 
     }
 
-    private incorrectMessageHandler(incorrectMessage: string): TextMessage {
+    private incorrectMessageHandler(incorrectMessage: string): Message[] {
 
         const seed = Math.floor(Math.random() * 5);
         let message = "";
+        const stickerHandler = new StickerHandler();
 
         if (incorrectMessage.length < 5) {
          switch (seed) {
@@ -157,10 +159,10 @@ export class TextMessageHandler implements ITextMessageHandler {
             }
         }
 
-        return {
+        return [{
             type: "text",
             text: message
-        }
+        }, stickerHandler.getNegativeStickerMessage()];
     }
 
 }
